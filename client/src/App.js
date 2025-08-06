@@ -1,5 +1,6 @@
 // client/src/App.js
 
+// imports at the top obviously
 import React, { useState } from 'react';
 import './App.css';
 
@@ -19,7 +20,9 @@ function App() {
   const [errors, setErrors] = useState({});
   
   // controls whether we show the form or the results page
+  // either show one of the other, not both at the same time
   const [showResults, setShowResults] = useState(false);
+
   // holds the generated itinerary data once the form is submitted
   const [tripData, setTripData] = useState(null);
 
@@ -197,7 +200,7 @@ function App() {
     <div className="App">
       <header className="App-header">
         <h1>PlayDay Trip Planner</h1>
-        <p>Fill in the details below to plan your perfect day out in London.</p>
+        <p>Fill in the details below to plan your perfect day out in London with your children!</p>
       </header>
 
       <main>
@@ -206,7 +209,7 @@ function App() {
           <form className="itinerary-form" onSubmit={handleSubmit} noValidate>
             
             <div className="form-section">
-              <label htmlFor="date-input">When are you going?</label>
+              <label htmlFor="date-input">When would you like to go?</label>
               <input 
                 id="date-input"
                 type="date" 
