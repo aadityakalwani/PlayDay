@@ -1,0 +1,246 @@
+/* client/src/App.css */
+
+body {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  color: #333;
+  margin: 0;
+  padding: 0;
+}
+
+.App {
+  max-width: 700px;
+  margin: 2rem auto;
+  padding: 2.5rem;
+  background-color: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.App-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+  border-bottom: 2px solid #f0f2f5;
+  padding-bottom: 1.5rem;
+}
+
+.App-header h1 {
+  color: #4f46e5;
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+}
+
+.App-header p {
+  color: #6b7280;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.itinerary-form {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.form-section label {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+/* Input Styling */
+input[type="date"],
+input[type="number"],
+input[type="text"],
+textarea {
+  padding: 1.25rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  font-family: inherit;
+  background-color: #fafafa;
+  min-height: 36px;
+}
+
+input[type="date"]:focus,
+input[type="number"]:focus,
+input[type="text"]:focus,
+textarea:focus {
+  outline: none;
+  border-color: #4f46e5;
+  background-color: white;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+/* Error Styling */
+input.error,
+textarea.error {
+  border-color: #ef4444;
+  background-color: #fef2f2;
+}
+
+input.error:focus,
+textarea.error:focus {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.error-message {
+  color: #ef4444;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-top: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.error-message::before {
+  content: "⚠️";
+  font-size: 0.75rem;
+}
+
+textarea {
+  min-height: 100px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+/* Button Groups */
+.button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.button-group button {
+  padding: 0.75rem 1.5rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 25px;
+  background-color: white;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  color: #374151;
+}
+
+.button-group button:hover {
+  border-color: #4f46e5;
+  background-color: #f8fafc;
+  transform: translateY(-1px);
+}
+
+.button-group button.selected {
+  background-color: #4f46e5;
+  color: white;
+  border-color: #4f46e5;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+/* Submit Button */
+.submit-button {
+  padding: 1.25rem 2rem;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 1.5rem;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.submit-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(79, 70, 229, 0.4);
+}
+
+.submit-button:active {
+  transform: translateY(0);
+}
+
+/* Child Form Styling */
+.child-form {
+  border: 2px solid #f3f4f6;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background-color: #fafafa;
+  position: relative;
+}
+
+.child-form h4 {
+  margin: 0 0 0.5rem 0;
+  color: #4f46e5;
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.child-form h4::before {
+  content: "👶";
+  font-size: 1.2rem;
+}
+
+.add-child-button {
+  align-self: flex-start;
+  padding: 1rem 1.5rem;
+  border: 2px dashed #4f46e5;
+  color: #4f46e5;
+  background-color: transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  margin-top: 1rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+}
+
+.add-child-button:hover {
+  background-color: #eef2ff;
+  border-style: solid;
+  transform: translateY(-1px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .App {
+    margin: 1rem;
+    padding: 1.5rem;
+  }
+  
+  .App-header h1 {
+    font-size: 2rem;
+  }
+  
+  .button-group {
+    gap: 0.5rem;
+  }
+  
+  .button-group button {
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+  }
+}
