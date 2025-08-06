@@ -259,7 +259,7 @@ function App() {
               <label>What are you interested in?</label>
               <div className="button-group">
                 {/* create a button for each interest option */}
-                {['Museums', 'Parks', 'Great Food', 'Hidden Gems', 'Art Galleries'].map(interest => (
+                {['Museums', 'Parks', 'Great Food', 'Hidden Gems', 'Art Galleries', 'Theatre & Shows', 'Markets', 'Animals & Zoos', 'Adventure Activities', 'Historical Sites'].map(interest => (
                   <button 
                     type="button" 
                     key={interest}
