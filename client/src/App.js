@@ -4,89 +4,94 @@ import React, { useState } from 'react';
 import './App.css';
 
 function App() {
-  // State for single-value fields remains the same
+  // basic form fields - keeps track of what the user has selected
   const [date, setDate] = useState('');
-  const [interests, setInterests] = useState([]);
+  const [interests, setInterests] = useState([]); // array since they can pick multiple interests
   const [budget, setBudget] = useState('');
 
-  // 'children' is now an array of objects.
-  // We start with one child by default.
+  // children is an array of objects because we can have multiple kids
+  // start with one empty child form by default
   const [children, setChildren] = useState([
     { age: '', preferences: '' }
   ]);
 
-  // Add error state
+  // keeps track of any validation errors to show red boxes and messages
   const [errors, setErrors] = useState({});
   
-  // Add state to track if we should show results
+  // controls whether we show the form or the results page
   const [showResults, setShowResults] = useState(false);
+  // holds the generated itinerary data once the form is submitted
   const [tripData, setTripData] = useState(null);
 
-  // Function to add a new child to the array ---
+  // adds another empty child form when user clicks the "add child" button
   const handleAddChild = () => {
     setChildren([...children, { age: '', preferences: '' }]);
   };
 
-  //  A more complex handler for child inputs ---
-  // It needs to know which child to update (using the 'index')
+  // handles typing in the child form inputs (age and preferences)
+  // needs the index to know which specific child is being updated
   const handleChildChange = (index, event) => {
-    // Create a new array so we don't directly change the state
+    // make a copy of the children array so we don't mess with react state directly
     const newChildren = [...children];
-    // Update the specific child's age or preferences
+    // update the specific field (age or preferences) for the specific child
     newChildren[index][event.target.name] = event.target.value;
     setChildren(newChildren);
     
-    // Clear errors for this field when user starts typing
+    // clear any error message for this field as soon as user starts typing
     const errorKey = `child-${index}-${event.target.name}`;
     if (errors[errorKey]) {
       setErrors(prev => ({ ...prev, [errorKey]: undefined }));
     }
   };
 
-  // Validation function
+  // checks if all the form fields are properly filled out
   const validateForm = () => {
     const newErrors = {};
 
-    // Date validation
+    // make sure they've picked a date and it's not in the past
     if (!date) {
       newErrors.date = 'Please select a date';
     } else if (new Date(date) < new Date().setHours(0,0,0,0)) {
       newErrors.date = 'Date cannot be in the past';
     }
 
-    // Children validation
+    // check each child's age is valid
     children.forEach((child, index) => {
       if (!child.age) {
         newErrors[`child-${index}-age`] = 'Age is required';
       } else if (isNaN(child.age) || !Number.isInteger(Number(child.age)) || child.age < 0) {
+        // catches text like "seven", decimals like "3.5", and negative numbers
         newErrors[`child-${index}-age`] = 'Age must be a whole number';
       } else if (child.age > 18) {
         newErrors[`child-${index}-age`] = 'Age must be 18 or under';
       }
     });
 
-    // Interests validation
+    // must pick at least one interest
     if (interests.length === 0) {
       newErrors.interests = 'Please select at least one interest';
     }
 
-    // Budget validation
+    // must pick a budget level
     if (!budget) {
       newErrors.budget = 'Please select a budget';
     }
 
     setErrors(newErrors);
+    // return true if no errors found
     return Object.keys(newErrors).length === 0;
   };
 
-  // Updated submit function
+  // handles form submission when user clicks "build my trip"
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault(); // stops the page from refreshing
     
+    // don't do anything if the form has errors
     if (!validateForm()) {
       return;
     }
 
+    // package up all the form data to send to the server
     const formData = {
       date,
       children,
@@ -95,7 +100,7 @@ function App() {
     };
 
     try {
-      // Send data to backend
+      // send the data to our backend server
       const response = await fetch('http://localhost:3001/api/plan-trip', {
         method: 'POST',
         headers: {
@@ -107,24 +112,26 @@ function App() {
       if (response.ok) {
         const result = await response.json();
         
-        // Generate a mock itinerary for now
+        // create a fake itinerary based on what they selected
         const mockItinerary = generateMockItinerary(formData);
         setTripData(mockItinerary);
-        setShowResults(true);
+        setShowResults(true); // switch to showing the results page
       } else {
         alert('Error planning trip. Please try again.');
       }
     } catch (error) {
+      // catches network errors or if server is down
       console.error('Error:', error);
       alert('Error connecting to server. Please try again.');
     }
   };
 
-  // Function to generate a mock itinerary based on user preferences
+  // creates a fake itinerary based on what interests the user picked
+  // this is temporary until we get real london attractions data
   const generateMockItinerary = (formData) => {
     const activities = [];
     
-    // Generate activities based on interests
+    // add different activities based on what they're interested in
     if (formData.interests.includes('Museums')) {
       activities.push({
         time: '10:00 AM',
@@ -155,7 +162,7 @@ function App() {
       });
     }
     
-    // Add a default activity if no specific interests match
+    // fallback activity if they didn't pick any specific interests
     if (activities.length === 0) {
       activities.push({
         time: '11:00 AM',
@@ -166,18 +173,22 @@ function App() {
       });
     }
 
+    // return all the trip data that the results page will display
     return {
       date: formData.date,
       children: formData.children,
       activities,
-      totalDuration: activities.length * 1.5 + ' hours'
+      totalDuration: activities.length * 1.5 + ' hours' // rough estimate
     };
   };
 
+  // handles clicking on interest buttons (museums, parks, etc.)
   const handleInterestClick = (interest) => {
     if (interests.includes(interest)) {
+      // if already selected, remove it
       setInterests(interests.filter(i => i !== interest));
     } else {
+      // if not selected, add it to the array
       setInterests([...interests, interest]);
     }
   };
@@ -191,7 +202,7 @@ function App() {
 
       <main>
         {!showResults ? (
-          // Show the form
+          // show the form if we haven't submitted yet
           <form className="itinerary-form" onSubmit={handleSubmit} noValidate>
             
             <div className="form-section">
@@ -202,6 +213,7 @@ function App() {
                 value={date}
                 onChange={(e) => {
                   setDate(e.target.value);
+                  // clear the error message as soon as they pick a date
                   if (errors.date) setErrors(prev => ({ ...prev, date: undefined }));
                 }}
                 className={errors.date ? 'error' : ''}
@@ -209,16 +221,15 @@ function App() {
               {errors.date && <span className="error-message">{errors.date}</span>}
             </div>
 
-            {/* --- UPDATED: Child Details Section --- */}
             <div className="form-section">
               <label>Child Details</label>
-              {/* We use .map() to create a form for each child in the array */}
+              {/* loop through each child and create a form for them */}
               {children.map((child, index) => (
                 <div className="child-form" key={index}>
                   <h4>Child {index + 1}</h4>
                   <input 
-                    type="text"
-                    name="age" // 'name' attribute is important now
+                    type="text" // using text instead of number to catch invalid input like "seven"
+                    name="age" // this tells handleChildChange which field is being updated
                     placeholder="Age"
                     value={child.age}
                     onChange={(e) => handleChildChange(index, e)}
@@ -228,14 +239,14 @@ function App() {
                     <span className="error-message">{errors[`child-${index}-age`]}</span>
                   )}
                   <textarea 
-                    name="preferences" // 'name' attribute is important now
+                    name="preferences" // this tells handleChildChange which field is being updated
                     placeholder="Preferences (e.g., loves dinosaurs, requires a stroller)"
                     value={child.preferences}
                     onChange={(e) => handleChildChange(index, e)}
                   />
                 </div>
               ))}
-              {/* The "Add Child" button calls our new function */}
+              {/* button to add more children */}
               <button type="button" className="add-child-button" onClick={handleAddChild}>
                 + Add Another Child
               </button>
@@ -244,12 +255,14 @@ function App() {
             <div className="form-section">
               <label>What are you interested in?</label>
               <div className="button-group">
+                {/* create a button for each interest option */}
                 {['Museums', 'Parks', 'Great Food', 'Hidden Gems', 'Art Galleries'].map(interest => (
                   <button 
                     type="button" 
                     key={interest}
                     onClick={() => {
                       handleInterestClick(interest);
+                      // clear error message when they select an interest
                       if (errors.interests) setErrors(prev => ({ ...prev, interests: undefined }));
                     }}
                     className={interests.includes(interest) ? 'selected' : ''}
@@ -264,12 +277,14 @@ function App() {
             <div className="form-section">
               <label>What's your budget?</label>
               <div className="button-group">
+                {/* create a button for each budget level */}
                 {['£', '££', '£££', '££££'].map(b => (
                   <button 
                     type="button" 
                     key={b}
                     onClick={() => {
                       setBudget(b);
+                      // clear error message when they select a budget
                       if (errors.budget) setErrors(prev => ({ ...prev, budget: undefined }));
                     }}
                     className={budget === b ? 'selected' : ''}
@@ -285,14 +300,14 @@ function App() {
 
           </form>
         ) : (
-          // Show the results
+          // show the results page after form submission
           <div className="results-container">
             <div className="results-header">
               <h2>Your Perfect PlayDay! 🎉</h2>
-              <p>Here's your personalized itinerary for {new Date(tripData.date).toLocaleDateString()}</p>
+              <p>Here's your personalised itinerary for {new Date(tripData.date).toLocaleDateString()}</p>
               <button 
                 className="back-button" 
-                onClick={() => setShowResults(false)}
+                onClick={() => setShowResults(false)} // go back to the form
               >
                 ← Plan Another Trip
               </button>
@@ -309,6 +324,7 @@ function App() {
 
             <div className="itinerary">
               <h3>Your Itinerary</h3>
+              {/* create a card for each activity in the itinerary */}
               {tripData.activities.map((activity, index) => (
                 <div key={index} className="activity-card">
                   <div className="activity-time">

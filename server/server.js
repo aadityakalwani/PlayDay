@@ -3,25 +3,27 @@
 const express = require('express');
 const cors = require('cors');
 const app = express();
-const port = 3001;
+const port = 3001; // run on port 3001 so it doesn't clash with react (which uses 3000)
 
+// middleware to allow requests from our react app running on localhost:3000
 app.use(cors());
+// middleware to parse json data from requests
 app.use(express.json());
 
-// This is our new, main endpoint
+// endpoint that receives the form data when user submits the trip planning form
 app.post('/api/plan-trip', (req, res) => {
-  // Get the form data from the request body sent by React
+  // extract the form data from the request body
   const formData = req.body;
 
-  // --- This is the crucial test ---
-  // We'll log the received data to our server's terminal
+  // log the data to the terminal so we can see what was sent
   console.log('Received form data on the back-end:');
   console.log(formData);
 
-  // Send a simple success message back to the front-end
+  // send a success response back to the frontend
   res.json({ message: "Data received successfully! Check the server terminal to see the data." });
 });
 
+// start the server and listen for requests
 app.listen(port, () => {
   console.log(`Server listening at http://localhost:${port}`);
 });
