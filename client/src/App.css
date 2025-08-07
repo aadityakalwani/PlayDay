@@ -75,6 +75,90 @@ textarea {
   min-height: 36px;
 }
 
+/* Enhanced Date Input Styling */
+input[type="date"] {
+  position: relative;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%234f46e5'%3e%3cpath fill-rule='evenodd' d='M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z' clip-rule='evenodd'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1.25rem;
+  padding-right: 3rem;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  width: 2rem;
+  height: 2rem;
+  cursor: pointer;
+}
+
+/* Safari and Chrome calendar styling */
+input[type="date"]::-webkit-datetime-edit {
+  color: #374151;
+  font-weight: 500;
+}
+
+input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+  display: flex;
+  align-items: center;
+  padding: 0;
+}
+
+input[type="date"]::-webkit-datetime-edit-text {
+  color: #6b7280;
+  padding: 0 0.25rem;
+}
+
+input[type="date"]::-webkit-datetime-edit-month-field,
+input[type="date"]::-webkit-datetime-edit-day-field,
+input[type="date"]::-webkit-datetime-edit-year-field {
+  color: #374151;
+  font-weight: 500;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 0.125rem 0.25rem;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+input[type="date"]::-webkit-datetime-edit-month-field:focus,
+input[type="date"]::-webkit-datetime-edit-day-field:focus,
+input[type="date"]::-webkit-datetime-edit-year-field:focus {
+  background-color: #eef2ff;
+  color: #4f46e5;
+  font-weight: 600;
+}
+
+/* Firefox date input styling */
+input[type="date"]::-moz-focus-inner {
+  border: 0;
+  padding: 0;
+}
+
+/* Enhanced focus styling for date input */
+input[type="date"]:focus {
+  outline: none;
+  border-color: #4f46e5;
+  background-color: white;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%234f46e5'%3e%3cpath fill-rule='evenodd' d='M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z' clip-rule='evenodd'/%3e%3c/svg%3e");
+}
+
+/* Date input placeholder styling */
+input[type="date"]:invalid {
+  color: #9ca3af;
+}
+
+input[type="date"]:valid {
+  color: #374151;
+}
+
+/* Custom calendar icon animation */
+input[type="date"]:hover {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%237c3aed'%3e%3cpath fill-rule='evenodd' d='M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z' clip-rule='evenodd'/%3e%3c/svg%3e");
+}
+
 input[type="date"]:focus,
 input[type="number"]:focus,
 input[type="text"]:focus,
