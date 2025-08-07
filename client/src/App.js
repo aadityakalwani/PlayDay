@@ -10,6 +10,9 @@ function App() {
   const [interests, setInterests] = useState([]); // array since they can pick multiple interests
   const [budget, setBudget] = useState('');
 
+  // time range for the trip - default 9am to 6pm
+  const [timeRange, setTimeRange] = useState([9, 18]); // 24-hour format
+
   // children is an array of objects because we can have multiple kids
   // start with one empty child form by default
   const [children, setChildren] = useState([
@@ -106,6 +109,7 @@ function App() {
       children,
       interests,
       budget,
+      timeRange, // include the time range
     };
 
     try {
@@ -141,112 +145,145 @@ function App() {
   // this is temporary until we get real london attractions data
   const generateMockItinerary = (formData) => {
     const activities = [];
+    const [startHour, endHour] = formData.timeRange;
+    
+    // helper function to format time
+    const formatTime = (hour) => {
+      if (hour === 0 || hour === 24) return '12:00 AM';
+      if (hour < 12) return `${hour}:00 AM`;
+      if (hour === 12) return '12:00 PM';
+      return `${hour - 12}:00 PM`;
+    };
+    
+    // calculate available time slots based on user's time range
+    let currentHour = startHour;
+    let activityCount = 0;
     
     // add different activities based on what they're interested in
-    if (formData.interests.includes('Museums')) {
+    if (formData.interests.includes('Museums') && currentHour < endHour - 1) {
       activities.push({
-        time: '10:00 AM',
+        time: formatTime(currentHour),
         title: 'Natural History Museum',
         description: 'Explore dinosaurs and interactive exhibits',
         duration: '2 hours',
         budgetLevel: formData.budget
       });
+      currentHour += 2;
+      activityCount++;
     }
     
-    if (formData.interests.includes('Parks')) {
+    if (formData.interests.includes('Markets') && currentHour < endHour - 1) {
       activities.push({
-        time: '1:00 PM', 
-        title: 'Hyde Park Adventure',
-        description: 'Playground time and picnic lunch',
-        duration: '1.5 hours',
-        budgetLevel: formData.budget
-      });
-    }
-    
-    if (formData.interests.includes('Great Food')) {
-      activities.push({
-        time: '3:30 PM',
-        title: 'Family-Friendly Café',
-        description: 'Delicious treats and child-friendly menu',
-        duration: '1 hour',
-        budgetLevel: formData.budget
-      });
-    }
-
-    if (formData.interests.includes('Hidden Gems')) {
-      activities.push({
-        time: '11:30 AM',
-        title: 'Neal\'s Yard Secret Garden',
-        description: 'Discover this colorful hidden courtyard in Covent Garden',
-        duration: '45 minutes',
-        budgetLevel: formData.budget
-      });
-    }
-
-    if (formData.interests.includes('Art Galleries')) {
-      activities.push({
-        time: '2:00 PM',
-        title: 'Tate Modern Family Workshop',
-        description: 'Interactive art activities and child-friendly exhibitions',
-        duration: '1.5 hours',
-        budgetLevel: formData.budget
-      });
-    }
-
-    if (formData.interests.includes('Theatre & Shows')) {
-      activities.push({
-        time: '4:00 PM',
-        title: 'West End Family Show',
-        description: 'Age-appropriate musical or puppet show in the theatre district',
-        duration: '2 hours',
-        budgetLevel: formData.budget
-      });
-    }
-
-    if (formData.interests.includes('Markets')) {
-      activities.push({
-        time: '10:30 AM',
+        time: formatTime(currentHour),
         title: 'Borough Market Food Adventure',
         description: 'Sample delicious treats and explore the historic food market',
         duration: '1.5 hours',
         budgetLevel: formData.budget
       });
+      currentHour += 1.5;
+      activityCount++;
+    }
+    
+    if (formData.interests.includes('Hidden Gems') && currentHour < endHour - 0.5) {
+      activities.push({
+        time: formatTime(Math.floor(currentHour)),
+        title: 'Neal\'s Yard Secret Garden',
+        description: 'Discover this colorful hidden courtyard in Covent Garden',
+        duration: '45 minutes',
+        budgetLevel: formData.budget
+      });
+      currentHour += 0.75;
+      activityCount++;
     }
 
-    if (formData.interests.includes('Animals & Zoos')) {
+    if (formData.interests.includes('Animals & Zoos') && currentHour < endHour - 2.5) {
       activities.push({
-        time: '9:30 AM',
+        time: formatTime(Math.floor(currentHour)),
         title: 'London Zoo Experience',
         description: 'Meet amazing animals and enjoy interactive exhibits',
         duration: '3 hours',
         budgetLevel: formData.budget
       });
+      currentHour += 3;
+      activityCount++;
     }
 
-    if (formData.interests.includes('Adventure Activities')) {
+    if (formData.interests.includes('Historical Sites') && currentHour < endHour - 2) {
       activities.push({
-        time: '1:30 PM',
-        title: 'Thames Clipper Boat Adventure',
-        description: 'Exciting boat ride along the Thames with stunning city views',
-        duration: '1 hour',
-        budgetLevel: formData.budget
-      });
-    }
-
-    if (formData.interests.includes('Historical Sites')) {
-      activities.push({
-        time: '11:00 AM',
+        time: formatTime(Math.floor(currentHour)),
         title: 'Tower of London Family Tour',
         description: 'Explore the historic fortress and see the Crown Jewels',
         duration: '2.5 hours',
         budgetLevel: formData.budget
       });
+      currentHour += 2.5;
+      activityCount++;
+    }
+
+    if (formData.interests.includes('Parks') && currentHour < endHour - 1) {
+      activities.push({
+        time: formatTime(Math.floor(currentHour)), 
+        title: 'Hyde Park Adventure',
+        description: 'Playground time and picnic lunch',
+        duration: '1.5 hours',
+        budgetLevel: formData.budget
+      });
+      currentHour += 1.5;
+      activityCount++;
     }
     
-    // fallback activity if they didn't pick any specific interests
-    if (activities.length === 0) {
+    if (formData.interests.includes('Art Galleries') && currentHour < endHour - 1) {
       activities.push({
-        time: '11:00 AM',
+        time: formatTime(Math.floor(currentHour)),
+        title: 'Tate Modern Family Workshop',
+        description: 'Interactive art activities and child-friendly exhibitions',
+        duration: '1.5 hours',
+        budgetLevel: formData.budget
+      });
+      currentHour += 1.5;
+      activityCount++;
+    }
+
+    if (formData.interests.includes('Adventure Activities') && currentHour < endHour - 0.5) {
+      activities.push({
+        time: formatTime(Math.floor(currentHour)),
+        title: 'Thames Clipper Boat Adventure',
+        description: 'Exciting boat ride along the Thames with stunning city views',
+        duration: '1 hour',
+        budgetLevel: formData.budget
+      });
+      currentHour += 1;
+      activityCount++;
+    }
+
+    if (formData.interests.includes('Great Food') && currentHour < endHour - 0.5) {
+      activities.push({
+        time: formatTime(Math.floor(currentHour)),
+        title: 'Family-Friendly Café',
+        description: 'Delicious treats and child-friendly menu',
+        duration: '1 hour',
+        budgetLevel: formData.budget
+      });
+      currentHour += 1;
+      activityCount++;
+    }
+
+    if (formData.interests.includes('Theatre & Shows') && currentHour < endHour - 1.5) {
+      activities.push({
+        time: formatTime(Math.floor(currentHour)),
+        title: 'West End Family Show',
+        description: 'Age-appropriate musical or puppet show in the theatre district',
+        duration: '2 hours',
+        budgetLevel: formData.budget
+      });
+      currentHour += 2;
+      activityCount++;
+    }
+    
+    // fallback activity if they didn't pick any specific interests or have remaining time
+    if (activities.length === 0 || (currentHour < endHour - 1 && activities.length < 3)) {
+      activities.push({
+        time: formatTime(activities.length === 0 ? startHour : Math.floor(currentHour)),
         title: 'London Eye',
         description: 'Family fun with amazing city views',
         duration: '1 hour',
@@ -254,12 +291,17 @@ function App() {
       });
     }
 
+    // calculate total duration more accurately
+    const totalHours = Math.max(endHour - startHour, activities.length * 1.5);
+    const totalDuration = `${Math.floor(totalHours)} hours ${totalHours % 1 === 0.5 ? '30 minutes' : ''}`;
+
     // return all the trip data that the results page will display
     return {
       date: formData.date,
       children: formData.children,
       activities,
-      totalDuration: activities.length * 1.5 + ' hours' // rough estimate
+      totalDuration: totalDuration.trim(),
+      timeRange: formData.timeRange
     };
   };
 
@@ -359,6 +401,66 @@ function App() {
                 className={errors.date ? 'error' : ''}
               />
               {errors.date && <span className="error-message">{errors.date}</span>}
+            </div>
+
+            <div className="form-section">
+              <label>What time would you like to start and finish?</label>
+              <div className="time-range-container">
+                <div className="time-range-labels">
+                  <span className="time-label start-time">
+                    Start: {timeRange[0] === 0 ? '12:00 AM' : timeRange[0] <= 12 ? `${timeRange[0]}:00 AM` : `${timeRange[0] - 12}:00 PM`}
+                  </span>
+                  <span className="time-label end-time">
+                    End: {timeRange[1] === 0 ? '12:00 AM' : timeRange[1] <= 12 ? `${timeRange[1]}:00 ${timeRange[1] === 12 ? 'PM' : 'AM'}` : `${timeRange[1] - 12}:00 PM`}
+                  </span>
+                </div>
+                <div className="time-slider-container">
+                  <div className="time-slider-track">
+                    <div 
+                      className="time-slider-range"
+                      style={{
+                        left: `${(timeRange[0] - 6) / 18 * 100}%`,
+                        width: `${(timeRange[1] - timeRange[0]) / 18 * 100}%`
+                      }}
+                    ></div>
+                    <input
+                      type="range"
+                      min="6"
+                      max="24"
+                      value={timeRange[0]}
+                      onChange={(e) => {
+                        const newStart = parseInt(e.target.value);
+                        if (newStart < timeRange[1]) {
+                          setTimeRange([newStart, timeRange[1]]);
+                        }
+                      }}
+                      className="time-slider time-slider-start"
+                    />
+                    <input
+                      type="range"
+                      min="6"
+                      max="24"
+                      value={timeRange[1]}
+                      onChange={(e) => {
+                        const newEnd = parseInt(e.target.value);
+                        if (newEnd > timeRange[0]) {
+                          setTimeRange([timeRange[0], newEnd]);
+                        }
+                      }}
+                      className="time-slider time-slider-end"
+                    />
+                  </div>
+                  <div className="time-markers">
+                    {[6, 9, 12, 15, 18, 21, 24].map(hour => (
+                      <div key={hour} className="time-marker" style={{left: `${(hour - 6) / 18 * 100}%`}}>
+                        <span className="time-marker-label">
+                          {hour === 0 || hour === 24 ? '12AM' : hour <= 12 ? `${hour}${hour === 12 ? 'PM' : 'AM'}` : `${hour - 12}PM`}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div className="form-section">
