@@ -164,6 +164,76 @@ function App() {
         budgetLevel: formData.budget
       });
     }
+
+    if (formData.interests.includes('Hidden Gems')) {
+      activities.push({
+        time: '11:30 AM',
+        title: 'Neal\'s Yard Secret Garden',
+        description: 'Discover this colorful hidden courtyard in Covent Garden',
+        duration: '45 minutes',
+        budgetLevel: formData.budget
+      });
+    }
+
+    if (formData.interests.includes('Art Galleries')) {
+      activities.push({
+        time: '2:00 PM',
+        title: 'Tate Modern Family Workshop',
+        description: 'Interactive art activities and child-friendly exhibitions',
+        duration: '1.5 hours',
+        budgetLevel: formData.budget
+      });
+    }
+
+    if (formData.interests.includes('Theatre & Shows')) {
+      activities.push({
+        time: '4:00 PM',
+        title: 'West End Family Show',
+        description: 'Age-appropriate musical or puppet show in the theatre district',
+        duration: '2 hours',
+        budgetLevel: formData.budget
+      });
+    }
+
+    if (formData.interests.includes('Markets')) {
+      activities.push({
+        time: '10:30 AM',
+        title: 'Borough Market Food Adventure',
+        description: 'Sample delicious treats and explore the historic food market',
+        duration: '1.5 hours',
+        budgetLevel: formData.budget
+      });
+    }
+
+    if (formData.interests.includes('Animals & Zoos')) {
+      activities.push({
+        time: '9:30 AM',
+        title: 'London Zoo Experience',
+        description: 'Meet amazing animals and enjoy interactive exhibits',
+        duration: '3 hours',
+        budgetLevel: formData.budget
+      });
+    }
+
+    if (formData.interests.includes('Adventure Activities')) {
+      activities.push({
+        time: '1:30 PM',
+        title: 'Thames Clipper Boat Adventure',
+        description: 'Exciting boat ride along the Thames with stunning city views',
+        duration: '1 hour',
+        budgetLevel: formData.budget
+      });
+    }
+
+    if (formData.interests.includes('Historical Sites')) {
+      activities.push({
+        time: '11:00 AM',
+        title: 'Tower of London Family Tour',
+        description: 'Explore the historic fortress and see the Crown Jewels',
+        duration: '2.5 hours',
+        budgetLevel: formData.budget
+      });
+    }
     
     // fallback activity if they didn't pick any specific interests
     if (activities.length === 0) {
