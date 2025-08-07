@@ -1,7 +1,7 @@
 // client/src/App.js
 
 // imports at the top obviously
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 
 function App() {
@@ -34,6 +34,132 @@ function App() {
 
   // track personal notes for activities
   const [activityNotes, setActivityNotes] = useState({});
+
+  // custom date picker state
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
+  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+  const datePickerRef = useRef(null);
+
+  // Handle click outside to close date picker
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (datePickerRef.current && !datePickerRef.current.contains(event.target)) {
+        setShowDatePicker(false);
+      }
+    };
+
+    if (showDatePicker) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showDatePicker]);
+
+  // custom date picker functions
+  const formatDateDisplay = (dateString) => {
+    if (!dateString) return 'Select a date';
+    const date = new Date(dateString);
+    const options = { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    };
+    return date.toLocaleDateString('en-US', options);
+  };
+
+  const getDaysInMonth = (month, year) => {
+    return new Date(year, month + 1, 0).getDate();
+  };
+
+  const getFirstDayOfMonth = (month, year) => {
+    return new Date(year, month, 1).getDay();
+  };
+
+  const handleDateSelect = (day) => {
+    const selectedDate = new Date(currentYear, currentMonth, day);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // Don't allow past dates
+    if (selectedDate < today) return;
+    
+    const dateString = selectedDate.toISOString().split('T')[0];
+    setDate(dateString);
+    setShowDatePicker(false);
+    
+    // clear any error message
+    if (errors.date) setErrors(prev => ({ ...prev, date: undefined }));
+  };
+
+  const navigateMonth = (direction) => {
+    if (direction === 'prev') {
+      if (currentMonth === 0) {
+        setCurrentMonth(11);
+        setCurrentYear(currentYear - 1);
+      } else {
+        setCurrentMonth(currentMonth - 1);
+      }
+    } else {
+      if (currentMonth === 11) {
+        setCurrentMonth(0);
+        setCurrentYear(currentYear + 1);
+      } else {
+        setCurrentMonth(currentMonth + 1);
+      }
+    }
+  };
+
+  const renderCalendarDays = () => {
+    const daysInMonth = getDaysInMonth(currentMonth, currentYear);
+    const firstDay = getFirstDayOfMonth(currentMonth, currentYear);
+    const today = new Date();
+    const selectedDate = date ? new Date(date) : null;
+    
+    const days = [];
+    
+    // Add empty cells for days before the first day of the month
+    for (let i = 0; i < firstDay; i++) {
+      days.push(
+        <div key={`empty-${i}`} className="calendar-day other-month"></div>
+      );
+    }
+    
+    // Add days of the current month
+    for (let day = 1; day <= daysInMonth; day++) {
+      const currentDate = new Date(currentYear, currentMonth, day);
+      const isToday = currentDate.toDateString() === today.toDateString();
+      const isSelected = selectedDate && currentDate.toDateString() === selectedDate.toDateString();
+      const isPast = currentDate < today.setHours(0, 0, 0, 0);
+      
+      let className = 'calendar-day';
+      if (isToday) className += ' today';
+      if (isSelected) className += ' selected';
+      if (isPast) className += ' past';
+      
+      days.push(
+        <div
+          key={day}
+          className={className}
+          onClick={() => handleDateSelect(day)}
+        >
+          {day}
+        </div>
+      );
+    }
+    
+    return days;
+  };
+
+  const monthNames = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   // adds another empty child form when user clicks the "add child" button
   const handleAddChild = () => {
@@ -387,17 +513,45 @@ function App() {
             
             <div className="form-section">
               <label htmlFor="date-input">When would you like to go?</label>
-              <input 
-                id="date-input"
-                type="date" 
-                value={date}
-                onChange={(e) => {
-                  setDate(e.target.value);
-                  // clear the error message as soon as they pick a date
-                  if (errors.date) setErrors(prev => ({ ...prev, date: undefined }));
-                }}
-                className={errors.date ? 'error' : ''}
-              />
+              <div className="date-picker-container" ref={datePickerRef}>
+                <div 
+                  className={`custom-date-input ${errors.date ? 'error' : ''}`}
+                  onClick={() => setShowDatePicker(!showDatePicker)}
+                >
+                  {formatDateDisplay(date)}
+                </div>
+                {showDatePicker && (
+                  <div className="date-picker-dropdown">
+                    <div className="calendar-header">
+                      <button
+                        type="button"
+                        className="calendar-nav-button"
+                        onClick={() => navigateMonth('prev')}
+                      >
+                        ‹
+                      </button>
+                      <div className="calendar-month-year">
+                        {monthNames[currentMonth]} {currentYear}
+                      </div>
+                      <button
+                        type="button"
+                        className="calendar-nav-button"
+                        onClick={() => navigateMonth('next')}
+                      >
+                        ›
+                      </button>
+                    </div>
+                    <div className="calendar-grid">
+                      {dayNames.map(day => (
+                        <div key={day} className="calendar-day-header">
+                          {day}
+                        </div>
+                      ))}
+                      {renderCalendarDays()}
+                    </div>
+                  </div>
+                )}
+              </div>
               {errors.date && <span className="error-message">{errors.date}</span>}
             </div>
 
