@@ -161,6 +161,18 @@ function App() {
 
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
+  // Helper function to format time range display
+  const formatTimeRange = (timeRange) => {
+    const formatHour = (hour) => {
+      if (hour === 0 || hour === 24) return '12:00 AM';
+      if (hour < 12) return `${hour}:00 AM`;
+      if (hour === 12) return '12:00 PM';
+      return `${hour - 12}:00 PM`;
+    };
+    
+    return `${formatHour(timeRange[0])} - ${formatHour(timeRange[1])}`;
+  };
+
   // adds another empty child form when user clicks the "add child" button
   const handleAddChild = () => {
     setChildren([...children, { age: '', preferences: '' }]);
@@ -711,6 +723,7 @@ function App() {
               <h3>Trip Summary</h3>
               <div className="summary-details">
                 <p><strong>Date:</strong> {new Date(tripData.date).toLocaleDateString()}</p>
+                <p><strong>Time Range:</strong> {formatTimeRange(tripData.timeRange)}</p>
                 <p><strong>Children:</strong> {tripData.children.length} child{tripData.children.length > 1 ? 'ren' : ''}</p>
                 <p><strong>Total Duration:</strong> {tripData.totalDuration}</p>
               </div>
