@@ -11,7 +11,7 @@ function App() {
   const [budget, setBudget] = useState('');
 
   // time range for the trip - default 9am to 6pm
-  const [timeRange, setTimeRange] = useState([9, 18]); // 24-hour format
+  const [timeRange, setTimeRange] = useState([18, 36]); // Using 30-minute increments: 6AM = 12, 9AM = 18, 6PM = 36, Midnight = 48
 
   // children is an array of objects because we can have multiple kids
   // start with one empty child form by default
@@ -163,11 +163,20 @@ function App() {
 
   // Helper function to format time range display
   const formatTimeRange = (timeRange) => {
-    const formatHour = (hour) => {
-      if (hour === 0 || hour === 24) return '12:00 AM';
-      if (hour < 12) return `${hour}:00 AM`;
-      if (hour === 12) return '12:00 PM';
-      return `${hour - 12}:00 PM`;
+    const formatHour = (halfHourIndex) => {
+      const totalMinutes = halfHourIndex * 30;
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = totalMinutes % 60;
+      
+      if (hours === 0 || hours === 24) {
+        return `12:${minutes.toString().padStart(2, '0')} AM`;
+      } else if (hours < 12) {
+        return `${hours}:${minutes.toString().padStart(2, '0')} AM`;
+      } else if (hours === 12) {
+        return `12:${minutes.toString().padStart(2, '0')} PM`;
+      } else {
+        return `${hours - 12}:${minutes.toString().padStart(2, '0')} PM`;
+      }
     };
     
     return `${formatHour(timeRange[0])} - ${formatHour(timeRange[1])}`;
@@ -281,145 +290,154 @@ function App() {
   // this is temporary until we get real london attractions data
   const generateMockItinerary = (formData) => {
     const activities = [];
-    const [startHour, endHour] = formData.timeRange;
+    const [startHalfHour, endHalfHour] = formData.timeRange;
     
     // helper function to format time
-    const formatTime = (hour) => {
-      if (hour === 0 || hour === 24) return '12:00 AM';
-      if (hour < 12) return `${hour}:00 AM`;
-      if (hour === 12) return '12:00 PM';
-      return `${hour - 12}:00 PM`;
+    const formatTime = (halfHourIndex) => {
+      const totalMinutes = halfHourIndex * 30;
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = totalMinutes % 60;
+      
+      if (hours === 0 || hours === 24) {
+        return `12:${minutes.toString().padStart(2, '0')} AM`;
+      } else if (hours < 12) {
+        return `${hours}:${minutes.toString().padStart(2, '0')} AM`;
+      } else if (hours === 12) {
+        return `12:${minutes.toString().padStart(2, '0')} PM`;
+      } else {
+        return `${hours - 12}:${minutes.toString().padStart(2, '0')} PM`;
+      }
     };
     
     // calculate available time slots based on user's time range
-    let currentHour = startHour;
+    let currentHalfHour = startHalfHour;
     let activityCount = 0;
     
     // add different activities based on what they're interested in
-    if (formData.interests.includes('Museums') && currentHour < endHour - 1) {
+    if (formData.interests.includes('Museums') && currentHalfHour < endHalfHour - 4) { // 2 hours = 4 half-hours
       activities.push({
-        time: formatTime(currentHour),
+        time: formatTime(currentHalfHour),
         title: 'Natural History Museum',
         description: 'Explore dinosaurs and interactive exhibits',
         duration: '2 hours',
         budgetLevel: formData.budget
       });
-      currentHour += 2;
+      currentHalfHour += 4; // 2 hours
       activityCount++;
     }
     
-    if (formData.interests.includes('Markets') && currentHour < endHour - 1) {
+    if (formData.interests.includes('Markets') && currentHalfHour < endHalfHour - 3) { // 1.5 hours = 3 half-hours
       activities.push({
-        time: formatTime(currentHour),
+        time: formatTime(currentHalfHour),
         title: 'Borough Market Food Adventure',
         description: 'Sample delicious treats and explore the historic food market',
         duration: '1.5 hours',
         budgetLevel: formData.budget
       });
-      currentHour += 1.5;
+      currentHalfHour += 3; // 1.5 hours
       activityCount++;
     }
     
-    if (formData.interests.includes('Hidden Gems') && currentHour < endHour - 0.5) {
+    if (formData.interests.includes('Hidden Gems') && currentHalfHour < endHalfHour - 1) { // 45 minutes ≈ 1 half-hour
       activities.push({
-        time: formatTime(Math.floor(currentHour)),
+        time: formatTime(currentHalfHour),
         title: 'Neal\'s Yard Secret Garden',
         description: 'Discover this colorful hidden courtyard in Covent Garden',
         duration: '45 minutes',
         budgetLevel: formData.budget
       });
-      currentHour += 0.75;
+      currentHalfHour += 2; // 45 minutes ≈ 1 hour (2 half-hours)
       activityCount++;
     }
 
-    if (formData.interests.includes('Animals & Zoos') && currentHour < endHour - 2.5) {
+    if (formData.interests.includes('Animals & Zoos') && currentHalfHour < endHalfHour - 6) { // 3 hours = 6 half-hours
       activities.push({
-        time: formatTime(Math.floor(currentHour)),
+        time: formatTime(currentHalfHour),
         title: 'London Zoo Experience',
         description: 'Meet amazing animals and enjoy interactive exhibits',
         duration: '3 hours',
         budgetLevel: formData.budget
       });
-      currentHour += 3;
+      currentHalfHour += 6; // 3 hours
       activityCount++;
     }
 
-    if (formData.interests.includes('Historical Sites') && currentHour < endHour - 2) {
+    if (formData.interests.includes('Historical Sites') && currentHalfHour < endHalfHour - 5) { // 2.5 hours = 5 half-hours
       activities.push({
-        time: formatTime(Math.floor(currentHour)),
+        time: formatTime(currentHalfHour),
         title: 'Tower of London Family Tour',
         description: 'Explore the historic fortress and see the Crown Jewels',
         duration: '2.5 hours',
         budgetLevel: formData.budget
       });
-      currentHour += 2.5;
+      currentHalfHour += 5; // 2.5 hours
       activityCount++;
     }
 
-    if (formData.interests.includes('Parks') && currentHour < endHour - 1) {
+    if (formData.interests.includes('Parks') && currentHalfHour < endHalfHour - 3) { // 1.5 hours = 3 half-hours
       activities.push({
-        time: formatTime(Math.floor(currentHour)), 
+        time: formatTime(currentHalfHour), 
         title: 'Hyde Park Adventure',
         description: 'Playground time and picnic lunch',
         duration: '1.5 hours',
         budgetLevel: formData.budget
       });
-      currentHour += 1.5;
+      currentHalfHour += 3; // 1.5 hours
       activityCount++;
     }
     
-    if (formData.interests.includes('Art Galleries') && currentHour < endHour - 1) {
+    if (formData.interests.includes('Art Galleries') && currentHalfHour < endHalfHour - 3) { // 1.5 hours = 3 half-hours
       activities.push({
-        time: formatTime(Math.floor(currentHour)),
+        time: formatTime(currentHalfHour),
         title: 'Tate Modern Family Workshop',
         description: 'Interactive art activities and child-friendly exhibitions',
         duration: '1.5 hours',
         budgetLevel: formData.budget
       });
-      currentHour += 1.5;
+      currentHalfHour += 3; // 1.5 hours
       activityCount++;
     }
 
-    if (formData.interests.includes('Adventure Activities') && currentHour < endHour - 0.5) {
+    if (formData.interests.includes('Adventure Activities') && currentHalfHour < endHalfHour - 2) { // 1 hour = 2 half-hours
       activities.push({
-        time: formatTime(Math.floor(currentHour)),
+        time: formatTime(currentHalfHour),
         title: 'Thames Clipper Boat Adventure',
         description: 'Exciting boat ride along the Thames with stunning city views',
         duration: '1 hour',
         budgetLevel: formData.budget
       });
-      currentHour += 1;
+      currentHalfHour += 2; // 1 hour
       activityCount++;
     }
 
-    if (formData.interests.includes('Great Food') && currentHour < endHour - 0.5) {
+    if (formData.interests.includes('Great Food') && currentHalfHour < endHalfHour - 2) { // 1 hour = 2 half-hours
       activities.push({
-        time: formatTime(Math.floor(currentHour)),
+        time: formatTime(currentHalfHour),
         title: 'Family-Friendly Café',
         description: 'Delicious treats and child-friendly menu',
         duration: '1 hour',
         budgetLevel: formData.budget
       });
-      currentHour += 1;
+      currentHalfHour += 2; // 1 hour
       activityCount++;
     }
 
-    if (formData.interests.includes('Theatre & Shows') && currentHour < endHour - 1.5) {
+    if (formData.interests.includes('Theatre & Shows') && currentHalfHour < endHalfHour - 4) { // 2 hours = 4 half-hours
       activities.push({
-        time: formatTime(Math.floor(currentHour)),
+        time: formatTime(currentHalfHour),
         title: 'West End Family Show',
         description: 'Age-appropriate musical or puppet show in the theatre district',
         duration: '2 hours',
         budgetLevel: formData.budget
       });
-      currentHour += 2;
+      currentHalfHour += 4; // 2 hours
       activityCount++;
     }
     
     // fallback activity if they didn't pick any specific interests or have remaining time
-    if (activities.length === 0 || (currentHour < endHour - 1 && activities.length < 3)) {
+    if (activities.length === 0 || (currentHalfHour < endHalfHour - 2 && activities.length < 3)) {
       activities.push({
-        time: formatTime(activities.length === 0 ? startHour : Math.floor(currentHour)),
+        time: formatTime(activities.length === 0 ? startHalfHour : currentHalfHour),
         title: 'London Eye',
         description: 'Family fun with amazing city views',
         duration: '1 hour',
@@ -428,7 +446,8 @@ function App() {
     }
 
     // calculate total duration more accurately
-    const totalHours = Math.max(endHour - startHour, activities.length * 1.5);
+    const totalHalfHours = Math.max(endHalfHour - startHalfHour, activities.length * 3);
+    const totalHours = totalHalfHours / 2;
     const totalDuration = `${Math.floor(totalHours)} hours ${totalHours % 1 === 0.5 ? '30 minutes' : ''}`;
 
     // return all the trip data that the results page will display
@@ -572,10 +591,10 @@ function App() {
               <div className="time-range-container">
                 <div className="time-range-labels">
                   <span className="time-label start-time">
-                    Start: {timeRange[0] === 0 ? '12:00 AM' : timeRange[0] <= 12 ? `${timeRange[0]}:00 AM` : `${timeRange[0] - 12}:00 PM`}
+                    Start: {formatTimeRange([timeRange[0], timeRange[0]]).split(' - ')[0]}
                   </span>
                   <span className="time-label end-time">
-                    End: {timeRange[1] === 0 ? '12:00 AM' : timeRange[1] <= 12 ? `${timeRange[1]}:00 ${timeRange[1] === 12 ? 'PM' : 'AM'}` : `${timeRange[1] - 12}:00 PM`}
+                    End: {formatTimeRange([timeRange[1], timeRange[1]]).split(' - ')[0]}
                   </span>
                 </div>
                 <div className="time-slider-container">
@@ -583,14 +602,15 @@ function App() {
                     <div 
                       className="time-slider-range"
                       style={{
-                        left: `${(timeRange[0] - 6) / 18 * 100}%`,
-                        width: `${(timeRange[1] - timeRange[0]) / 18 * 100}%`
+                        left: `${(timeRange[0] - 12) / 36 * 100}%`,
+                        width: `${(timeRange[1] - timeRange[0]) / 36 * 100}%`
                       }}
                     ></div>
                     <input
                       type="range"
-                      min="6"
-                      max="24"
+                      min="12"
+                      max="48"
+                      step="1"
                       value={timeRange[0]}
                       onChange={(e) => {
                         const newStart = parseInt(e.target.value);
@@ -602,8 +622,9 @@ function App() {
                     />
                     <input
                       type="range"
-                      min="6"
-                      max="24"
+                      min="12"
+                      max="48"
+                      step="1"
                       value={timeRange[1]}
                       onChange={(e) => {
                         const newEnd = parseInt(e.target.value);
@@ -615,13 +636,22 @@ function App() {
                     />
                   </div>
                   <div className="time-markers">
-                    {[6, 9, 12, 15, 18, 21, 24].map(hour => (
-                      <div key={hour} className="time-marker" style={{left: `${(hour - 6) / 18 * 100}%`}}>
-                        <span className="time-marker-label">
-                          {hour === 0 || hour === 24 ? '12AM' : hour <= 12 ? `${hour}${hour === 12 ? 'PM' : 'AM'}` : `${hour - 12}PM`}
-                        </span>
-                      </div>
-                    ))}
+                    {[12, 18, 24, 30, 36, 42, 48].map(halfHourIndex => {
+                      const totalMinutes = halfHourIndex * 30;
+                      const hours = Math.floor(totalMinutes / 60);
+                      let label;
+                      if (hours === 0 || hours === 24) label = '12AM';
+                      else if (hours <= 12) label = `${hours}${hours === 12 ? 'PM' : 'AM'}`;
+                      else label = `${hours - 12}PM`;
+                      
+                      return (
+                        <div key={halfHourIndex} className="time-marker" style={{left: `${(halfHourIndex - 12) / 36 * 100}%`}}>
+                          <span className="time-marker-label">
+                            {label}
+                          </span>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
