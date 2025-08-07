@@ -26,6 +26,12 @@ function App() {
   // holds the generated itinerary data once the form is submitted
   const [tripData, setTripData] = useState(null);
 
+  // track which activities are completed
+  const [completedActivities, setCompletedActivities] = useState(new Set());
+
+  // track personal notes for activities
+  const [activityNotes, setActivityNotes] = useState({});
+
   // adds another empty child form when user clicks the "add child" button
   const handleAddChild = () => {
     setChildren([...children, { age: '', preferences: '' }]);
@@ -113,6 +119,8 @@ function App() {
       });
 
       if (response.ok) {
+        // to stop it shouting at me for some stupid warning
+        // eslint-disable-next-line
         const result = await response.json();
         
         // create a fake itinerary based on what they selected
@@ -255,6 +263,65 @@ function App() {
     };
   };
 
+  // handles drag and drop reordering of activities
+  const handleDragStart = (e, index) => {
+    e.dataTransfer.setData('text/plain', index);
+    e.currentTarget.style.opacity = '0.5';
+  };
+
+  const handleDragEnd = (e) => {
+    e.currentTarget.style.opacity = '1';
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e, dropIndex) => {
+    e.preventDefault();
+    const dragIndex = parseInt(e.dataTransfer.getData('text/plain'));
+    
+    if (dragIndex === dropIndex) return;
+
+    const newActivities = [...tripData.activities];
+    const draggedItem = newActivities[dragIndex];
+    
+    // Remove dragged item and insert at new position
+    newActivities.splice(dragIndex, 1);
+    newActivities.splice(dropIndex, 0, draggedItem);
+    
+    setTripData({
+      ...tripData,
+      activities: newActivities
+    });
+  };
+
+  // toggle activity completion
+  const toggleActivityCompletion = (index) => {
+    const newCompleted = new Set(completedActivities);
+    if (newCompleted.has(index)) {
+      newCompleted.delete(index);
+    } else {
+      newCompleted.add(index);
+    }
+    setCompletedActivities(newCompleted);
+  };
+
+  // add/update activity notes
+  const updateActivityNote = (index, note) => {
+    setActivityNotes({
+      ...activityNotes,
+      [index]: note
+    });
+  };
+
+  // reset all trip data when going back to form
+  const resetTripData = () => {
+    setShowResults(false);
+    setCompletedActivities(new Set());
+    setActivityNotes({});
+  };
+
   // handles clicking on interest buttons (museums, parks, etc.)
   const handleInterestClick = (interest) => {
     if (interests.includes(interest)) {
@@ -380,7 +447,7 @@ function App() {
               <p>Here's your personalised itinerary for {new Date(tripData.date).toLocaleDateString()}</p>
               <button 
                 className="back-button" 
-                onClick={() => setShowResults(false)} // go back to the form
+                onClick={resetTripData} // go back to the form and reset data
               >
                 ← Plan Another Trip
               </button>
@@ -396,21 +463,71 @@ function App() {
             </div>
 
             <div className="itinerary">
-              <h3>Your Itinerary</h3>
-              {/* create a card for each activity in the itinerary */}
-              {tripData.activities.map((activity, index) => (
-                <div key={index} className="activity-card">
-                  <div className="activity-time">
-                    <span className="time">{activity.time}</span>
-                    <span className="duration">{activity.duration}</span>
+              <div className="itinerary-header">
+                <h3>Your Itinerary</h3>
+                <p className="itinerary-subtitle">Drag activities to reorder them • Click checkboxes to mark as complete</p>
+              </div>
+              
+              <div className="activities-list">
+                {/* create a card for each activity in the itinerary */}
+                {tripData.activities.map((activity, index) => (
+                  <div 
+                    key={index} 
+                    className={`activity-card ${completedActivities.has(index) ? 'completed' : ''}`}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, index)}
+                    onDragEnd={handleDragEnd}
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => handleDrop(e, index)}
+                  >
+                    <div className="drag-handle">
+                      <span className="drag-icon">⋮⋮</span>
+                    </div>
+                    
+                    <div className="activity-checkbox">
+                      <input
+                        type="checkbox"
+                        checked={completedActivities.has(index)}
+                        onChange={() => toggleActivityCompletion(index)}
+                        className="activity-check"
+                      />
+                    </div>
+                    
+                    <div className="activity-time">
+                      <span className="time">{activity.time}</span>
+                      <span className="duration">{activity.duration}</span>
+                    </div>
+                    
+                    <div className="activity-details">
+                      <h4>{activity.title}</h4>
+                      <p>{activity.description}</p>
+                      <div className="activity-meta">
+                        <span className="budget-indicator">Budget: {activity.budgetLevel}</span>
+                        <span className="activity-number">Activity {index + 1}</span>
+                      </div>
+                      
+                      <div className="activity-notes">
+                        <textarea
+                          placeholder="Add personal notes..."
+                          value={activityNotes[index] || ''}
+                          onChange={(e) => updateActivityNote(index, e.target.value)}
+                          className="notes-input"
+                          rows="2"
+                        />
+                      </div>
+                    </div>
                   </div>
-                  <div className="activity-details">
-                    <h4>{activity.title}</h4>
-                    <p>{activity.description}</p>
-                    <span className="budget-indicator">Budget: {activity.budgetLevel}</span>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
+              
+              <div className="itinerary-actions">
+                <button className="print-button" onClick={() => window.print()}>
+                  🖨️ Print Itinerary
+                </button>
+                <button className="share-button" onClick={() => navigator.share ? navigator.share({title: 'My PlayDay Itinerary', text: 'Check out my London family trip!'}) : alert('Sharing not supported on this device')}>
+                  📤 Share Trip
+                </button>
+              </div>
             </div>
           </div>
         )}
