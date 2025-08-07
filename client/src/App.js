@@ -123,8 +123,6 @@ function App() {
       });
 
       if (response.ok) {
-        // to stop it shouting at me for some stupid warning
-        // eslint-disable-next-line
         const result = await response.json();
         
         // create a fake itinerary based on what they selected
