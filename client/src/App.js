@@ -364,18 +364,6 @@ function App() {
       activityCount++;
     }
 
-    if (formData.interests.includes('Historical Sites') && currentHalfHour < endHalfHour - 5) { // 2.5 hours = 5 half-hours
-      activities.push({
-        time: formatTime(currentHalfHour),
-        title: 'Tower of London Family Tour',
-        description: 'Explore the historic fortress and see the Crown Jewels',
-        duration: '2.5 hours',
-        budgetLevel: formData.budget
-      });
-      currentHalfHour += 5; // 2.5 hours
-      activityCount++;
-    }
-
     if (formData.interests.includes('Parks') && currentHalfHour < endHalfHour - 3) { // 1.5 hours = 3 half-hours
       activities.push({
         time: formatTime(currentHalfHour), 
