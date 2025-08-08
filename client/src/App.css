@@ -856,7 +856,6 @@ textarea {
 
 .activity-card[draggable="true"]:active {
   cursor: grabbing;
-  transform: rotate(2deg);
 }
 
 /* Mobile responsiveness for enhanced itinerary */
