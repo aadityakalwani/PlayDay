@@ -76,7 +76,10 @@ function App() {
   };
 
   const getFirstDayOfMonth = (month, year) => {
-    return new Date(year, month, 1).getDay();
+    // Get the day of week (0 = Sunday, 6 = Saturday)
+    const day = new Date(year, month, 1).getDay();
+    // Convert to Monday = 0, Sunday = 6
+    return day === 0 ? 6 : day - 1;
   };
 
   const handleDateSelect = (day) => {
@@ -159,7 +162,7 @@ function App() {
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
 
-  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
   // Helper function to format time range display
   const formatTimeRange = (timeRange) => {
