@@ -589,6 +589,33 @@ textarea {
   border: 2px solid #e2e8f0;
 }
 
+.ai-response {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  padding: 1.5rem;
+  border-radius: 16px;
+  border: 2px solid #0ea5e9;
+  margin-bottom: 2rem;
+}
+
+.ai-response h3 {
+  color: #0369a1;
+  font-size: 1.4rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ai-response-text {
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  font-style: italic;
+  color: #1e293b;
+  line-height: 1.6;
+  border-left: 4px solid #0ea5e9;
+}
+
 .trip-summary h3 {
   color: #1e293b;
   font-size: 1.4rem;

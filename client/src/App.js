@@ -274,8 +274,8 @@ function App() {
       if (response.ok) {
         const result = await response.json();
         
-        // create a fake itinerary based on what they selected
-        const mockItinerary = generateMockItinerary(formData);
+        // create an AI-powered itinerary based on what they selected
+        const mockItinerary = await generateMockItinerary(formData);
         setTripData(mockItinerary);
         setShowResults(true); // switch to showing the results page
       } else {
@@ -288,166 +288,125 @@ function App() {
     }
   };
 
-  // creates a fake itinerary based on what interests the user picked
-  // this is temporary until we get real london attractions data
-  const generateMockItinerary = (formData) => {
-    const activities = [];
-    const [startHalfHour, endHalfHour] = formData.timeRange;
-    
-    // helper function to format time
-    const formatTime = (halfHourIndex) => {
-      const totalMinutes = halfHourIndex * 30;
-      const hours = Math.floor(totalMinutes / 60);
-      const minutes = totalMinutes % 60;
+  // creates an AI-powered itinerary using Hugging Face
+  const generateMockItinerary = async (formData) => {
+
+    const prompt = `
+      You are an expert London tour guide for families. Create a detailed, timed itinerary for a family day out in London based on these requirements:
+      - Date: ${new Date(formData.date).toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+      - Time Frame: From ${formatTimeRange([formData.timeRange[0], 0]).split(' - ')[0]} to ${formatTimeRange([formData.timeRange[1], 0]).split(' - ')[0]}.
+      - Children: ${formData.children.map((child, i) => `Child ${i+1} is age ${child.age}${child.preferences ? `, with these preferences: ${child.preferences}` : ''}`).join('; ')}.
+      - Main Interests: ${formData.interests.join(', ')}.
+      - Budget Level: ${formData.budget}.
+
+      Please provide a response in a structured JSON format. The JSON object should have a key named "activities" which is an array of objects. Each activity object must have the following keys: "time" (e.g., "9:00 AM"), "duration" (e.g., "2 hours"), "title" (e.g., "Natural History Museum"), and "description" (a brief, kid-friendly explanation of why this activity was chosen). Do not include any text or explanations outside of the JSON object.
+    `;
+
+    try {
+
+      const apiKey = process.env.REACT_APP_GEMINI_API_KEY;
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
       
-      if (hours === 0 || hours === 24) {
-        return `12:${minutes.toString().padStart(2, '0')} AM`;
-      } else if (hours < 12) {
-        return `${hours}:${minutes.toString().padStart(2, '0')} AM`;
-      } else if (hours === 12) {
-        return `12:${minutes.toString().padStart(2, '0')} PM`;
-      } else {
-        return `${hours - 12}:${minutes.toString().padStart(2, '0')} PM`;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+        }),
+      });
+
+      console.log('Response status:', response.status);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.log('Error response body:', errorText);
+        
+        if (response.status === 404) {
+          throw new Error(`Model not found (404). The model might not be available or needs to be loaded. Response: ${errorText}`);
+        } else if (response.status === 503) {
+          throw new Error(`Service unavailable (503). The model is loading, please wait. Response: ${errorText}`);
+        } else {
+          throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
+        }
       }
-    };
-    
-    // calculate available time slots based on user's time range
-    let currentHalfHour = startHalfHour;
-    let activityCount = 0;
-    
-    // add different activities based on what they're interested in
-    if (formData.interests.includes('Museums') && currentHalfHour < endHalfHour - 4) { // 2 hours = 4 half-hours
-      activities.push({
-        time: formatTime(currentHalfHour),
-        title: 'Natural History Museum',
-        description: 'Explore dinosaurs and interactive exhibits',
-        duration: '2 hours',
-        budgetLevel: formData.budget
-      });
-      currentHalfHour += 4; // 2 hours
-      activityCount++;
-    }
-    
-    if (formData.interests.includes('Markets') && currentHalfHour < endHalfHour - 3) { // 1.5 hours = 3 half-hours
-      activities.push({
-        time: formatTime(currentHalfHour),
-        title: 'Borough Market Food Adventure',
-        description: 'Sample delicious treats and explore the historic food market',
-        duration: '1.5 hours',
-        budgetLevel: formData.budget
-      });
-      currentHalfHour += 3; // 1.5 hours
-      activityCount++;
-    }
-    
-    if (formData.interests.includes('Hidden Gems') && currentHalfHour < endHalfHour - 1) { // 45 minutes ≈ 1 half-hour
-      activities.push({
-        time: formatTime(currentHalfHour),
-        title: 'Neal\'s Yard Secret Garden',
-        description: 'Discover this colorful hidden courtyard in Covent Garden',
-        duration: '45 minutes',
-        budgetLevel: formData.budget
-      });
-      currentHalfHour += 2; // 45 minutes ≈ 1 hour (2 half-hours)
-      activityCount++;
-    }
 
-    if (formData.interests.includes('Animals & Zoos') && currentHalfHour < endHalfHour - 6) { // 3 hours = 6 half-hours
-      activities.push({
-        time: formatTime(currentHalfHour),
-        title: 'London Zoo Experience',
-        description: 'Meet amazing animals and enjoy interactive exhibits',
-        duration: '3 hours',
-        budgetLevel: formData.budget
-      });
-      currentHalfHour += 6; // 3 hours
-      activityCount++;
-    }
+      const data = await response.json();
+      console.log('Gemini API Response:', data);
+      
+      // Extract the AI's response text from Gemini's response format
+      const aiText = data?.candidates?.[0]?.content?.parts?.[0]?.text || 'AI response received but no text found.';
+      console.log('Extracted AI Text:', aiText);
+      
+      // Create fallback activities with TK prefix (these will be used until we can properly parse AI response)
+      const activities = [];
+      let currentTime = formData.timeRange[0];
+      
+      // Add activities based on interests - these are fallback activities
+      if (formData.interests.includes('Museums')) {
+        activities.push({
+          time: formatTimeRange([currentTime, currentTime]).split(' - ')[0],
+          title: 'TK Natural History Museum',
+          description: 'Explore dinosaurs and interactive exhibits',
+          duration: '2 hours',
+          budgetLevel: formData.budget
+        });
+        currentTime += 4;
+      }
+      
+      if (formData.interests.includes('Parks') && currentTime < formData.timeRange[1] - 3) {
+        activities.push({
+          time: formatTimeRange([currentTime, currentTime]).split(' - ')[0],
+          title: 'TK Hyde Park Adventure',
+          description: 'Playground time and open space to run around',
+          duration: '1.5 hours',
+          budgetLevel: formData.budget
+        });
+        currentTime += 3;
+      }
+      
+      // Fallback activity if no others match
+      if (activities.length === 0) {
+        activities.push({
+          time: formatTimeRange([formData.timeRange[0], formData.timeRange[0]]).split(' - ')[0],
+          title: 'TK London Eye',
+          description: 'Family-friendly observation wheel with amazing views',
+          duration: '1 hour',
+          budgetLevel: formData.budget
+        });
+      }
+      
+      // Return data including the AI's raw response
+      return {
+        date: formData.date,
+        children: formData.children,
+        activities,
+        totalDuration: formatTimeRange(formData.timeRange),
+        timeRange: formData.timeRange,
+        aiResponse: `AI says: "${aiText.trim()}"` // This is the raw AI output we'll display
+      };
 
-    if (formData.interests.includes('Parks') && currentHalfHour < endHalfHour - 3) { // 1.5 hours = 3 half-hours
-      activities.push({
-        time: formatTime(currentHalfHour), 
-        title: 'Hyde Park Adventure',
-        description: 'Playground time and picnic lunch',
-        duration: '1.5 hours',
-        budgetLevel: formData.budget
-      });
-      currentHalfHour += 3; // 1.5 hours
-      activityCount++;
+    } catch (error) {
+      console.error('AI Error:', error);
+      
+      // Fallback if AI fails - all with TK prefix
+      return {
+        date: formData.date,
+        children: formData.children,
+        activities: [
+          {
+            time: formatTimeRange([formData.timeRange[0], formData.timeRange[0]]).split(' - ')[0],
+            title: 'TK London Eye',
+            description: 'Family-friendly observation wheel with amazing city views',
+            duration: '1 hour',
+            budgetLevel: formData.budget
+          }
+        ],
+        totalDuration: formatTimeRange(formData.timeRange),
+        timeRange: formData.timeRange,
+        aiResponse: `AI Error: ${error.message}. Using fallback recommendations.`
+      };
     }
-    
-    if (formData.interests.includes('Art Galleries') && currentHalfHour < endHalfHour - 3) { // 1.5 hours = 3 half-hours
-      activities.push({
-        time: formatTime(currentHalfHour),
-        title: 'Tate Modern Family Workshop',
-        description: 'Interactive art activities and child-friendly exhibitions',
-        duration: '1.5 hours',
-        budgetLevel: formData.budget
-      });
-      currentHalfHour += 3; // 1.5 hours
-      activityCount++;
-    }
-
-    if (formData.interests.includes('Adventure Activities') && currentHalfHour < endHalfHour - 2) { // 1 hour = 2 half-hours
-      activities.push({
-        time: formatTime(currentHalfHour),
-        title: 'Thames Clipper Boat Adventure',
-        description: 'Exciting boat ride along the Thames with stunning city views',
-        duration: '1 hour',
-        budgetLevel: formData.budget
-      });
-      currentHalfHour += 2; // 1 hour
-      activityCount++;
-    }
-
-    if (formData.interests.includes('Great Food') && currentHalfHour < endHalfHour - 2) { // 1 hour = 2 half-hours
-      activities.push({
-        time: formatTime(currentHalfHour),
-        title: 'Family-Friendly Café',
-        description: 'Delicious treats and child-friendly menu',
-        duration: '1 hour',
-        budgetLevel: formData.budget
-      });
-      currentHalfHour += 2; // 1 hour
-      activityCount++;
-    }
-
-    if (formData.interests.includes('Theatre & Shows') && currentHalfHour < endHalfHour - 4) { // 2 hours = 4 half-hours
-      activities.push({
-        time: formatTime(currentHalfHour),
-        title: 'West End Family Show',
-        description: 'Age-appropriate musical or puppet show in the theatre district',
-        duration: '2 hours',
-        budgetLevel: formData.budget
-      });
-      currentHalfHour += 4; // 2 hours
-      activityCount++;
-    }
-    
-    // fallback activity if they didn't pick any specific interests or have remaining time
-    if (activities.length === 0 || (currentHalfHour < endHalfHour - 2 && activities.length < 3)) {
-      activities.push({
-        time: formatTime(activities.length === 0 ? startHalfHour : currentHalfHour),
-        title: 'London Eye',
-        description: 'Family fun with amazing city views',
-        duration: '1 hour',
-        budgetLevel: formData.budget
-      });
-    }
-
-    // calculate total duration more accurately
-    const totalHalfHours = Math.max(endHalfHour - startHalfHour, activities.length * 3);
-    const totalHours = totalHalfHours / 2;
-    const totalDuration = `${Math.floor(totalHours)} hours ${totalHours % 1 === 0.5 ? '30 minutes' : ''}`;
-
-    // return all the trip data that the results page will display
-    return {
-      date: formData.date,
-      children: formData.children,
-      activities,
-      totalDuration: totalDuration.trim(),
-      timeRange: formData.timeRange
-    };
   };
 
   // handles drag and drop reordering of activities
@@ -748,6 +707,15 @@ function App() {
                 <p><strong>Total Duration:</strong> {tripData.totalDuration}</p>
               </div>
             </div>
+
+            {tripData.aiResponse && (
+              <div className="ai-response">
+                <h3>🤖 AI Recommendation</h3>
+                <div className="ai-response-text">
+                  {tripData.aiResponse}
+                </div>
+              </div>
+            )}
 
             <div className="itinerary">
               <div className="itinerary-header">
