@@ -847,74 +847,6 @@ function App() {
               </div>
             )}
 
-            {tripData.logistics && (
-              <div className="logistics-info">
-                <h3>🚇 Transport & Logistics</h3>
-                <div className="logistics-grid">
-                  <div className="logistics-item">
-                    <strong>Recommended Transport:</strong>
-                    <span>{tripData.logistics.transportMethod}</span>
-                  </div>
-                  <div className="logistics-item">
-                    <strong>Total Walking Time:</strong>
-                    <span>{tripData.logistics.totalWalkingTime}</span>
-                  </div>
-                  <div className="logistics-item">
-                    <strong>Weather Backup Plan:</strong>
-                    <span>{tripData.logistics.weatherBackup}</span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {tripData.mealPlanning && (
-              <div className="meal-planning">
-                <h3>🍽️ Meal Planning</h3>
-                <div className="meal-grid">
-                  {tripData.mealPlanning.breakfast && (
-                    <div className="meal-item">
-                      <strong>Breakfast:</strong>
-                      <span>{tripData.mealPlanning.breakfast}</span>
-                    </div>
-                  )}
-                  <div className="meal-item">
-                    <strong>Lunch:</strong>
-                    <span>{tripData.mealPlanning.lunch}</span>
-                  </div>
-                  <div className="meal-item">
-                    <strong>Snacks:</strong>
-                    <span>{tripData.mealPlanning.snacks}</span>
-                  </div>
-                  {tripData.mealPlanning.dietary && (
-                    <div className="meal-item dietary">
-                      <strong>Dietary Notes:</strong>
-                      <span>{tripData.mealPlanning.dietary}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {tripData.emergencyInfo && (
-              <div className="emergency-info">
-                <h3>🏥 Emergency Information</h3>
-                <div className="emergency-grid">
-                  <div className="emergency-item">
-                    <strong>Nearest Hospital:</strong>
-                    <span>{tripData.emergencyInfo.nearestHospital}</span>
-                  </div>
-                  <div className="emergency-item">
-                    <strong>Pharmacies:</strong>
-                    <span>{tripData.emergencyInfo.pharmacies}</span>
-                  </div>
-                  <div className="emergency-item">
-                    <strong>Public Toilets:</strong>
-                    <span>{tripData.emergencyInfo.toilets}</span>
-                  </div>
-                </div>
-              </div>
-            )}
-
             <div className="itinerary">
               <div className="itinerary-header">
                 <h3>Your Itinerary</h3>
@@ -1023,6 +955,74 @@ function App() {
                 </button>
               </div>
             </div>
+
+            {tripData.logistics && (
+              <div className="logistics-info">
+                <h3>🚇 Transport & Logistics</h3>
+                <div className="logistics-grid">
+                  <div className="logistics-item">
+                    <strong>Recommended Transport:</strong>
+                    <span>{tripData.logistics.transportMethod}</span>
+                  </div>
+                  <div className="logistics-item">
+                    <strong>Total Walking Time:</strong>
+                    <span>{tripData.logistics.totalWalkingTime}</span>
+                  </div>
+                  <div className="logistics-item">
+                    <strong>Weather Backup Plan:</strong>
+                    <span>{tripData.logistics.weatherBackup}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {tripData.mealPlanning && (
+              <div className="meal-planning">
+                <h3>🍽️ Meal Planning</h3>
+                <div className="meal-grid">
+                  {tripData.mealPlanning.breakfast && (
+                    <div className="meal-item">
+                      <strong>Breakfast:</strong>
+                      <span>{tripData.mealPlanning.breakfast}</span>
+                    </div>
+                  )}
+                  <div className="meal-item">
+                    <strong>Lunch:</strong>
+                    <span>{tripData.mealPlanning.lunch}</span>
+                  </div>
+                  <div className="meal-item">
+                    <strong>Snacks:</strong>
+                    <span>{tripData.mealPlanning.snacks}</span>
+                  </div>
+                  {tripData.mealPlanning.dietary && (
+                    <div className="meal-item dietary">
+                      <strong>Dietary Notes:</strong>
+                      <span>{tripData.mealPlanning.dietary}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {tripData.emergencyInfo && (
+              <div className="emergency-info">
+                <h3>🏥 Emergency Information</h3>
+                <div className="emergency-grid">
+                  <div className="emergency-item">
+                    <strong>Nearest Hospital:</strong>
+                    <span>{tripData.emergencyInfo.nearestHospital}</span>
+                  </div>
+                  <div className="emergency-item">
+                    <strong>Pharmacies:</strong>
+                    <span>{tripData.emergencyInfo.pharmacies}</span>
+                  </div>
+                  <div className="emergency-item">
+                    <strong>Public Toilets:</strong>
+                    <span>{tripData.emergencyInfo.toilets}</span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </main>
