@@ -940,7 +940,6 @@ function App() {
                       )}
                       
                       <div className="activity-meta">
-                        <span className="budget-indicator">Budget: {activity.budgetLevel}</span>
                         <span className="activity-number">Activity {index + 1}</span>
                       </div>
                       
