@@ -507,6 +507,10 @@ function App() {
         activities,
         totalDuration: formatTimeRange(formData.timeRange),
         timeRange: formData.timeRange,
+        // Include the rich structured data from AI
+        logistics: parsedResponse?.logistics,
+        mealPlanning: parsedResponse?.mealPlanning,
+        emergencyInfo: parsedResponse?.emergencyInfo,
         aiResponse: parsedResponse ? 
           `AI Planning Summary: ${parsedResponse.summary || 'Comprehensive itinerary generated successfully!'}` : 
           `Raw AI Response: "${aiText.substring(0, 500)}${aiText.length > 500 ? '...' : ''}"`
@@ -843,6 +847,74 @@ function App() {
               </div>
             )}
 
+            {tripData.logistics && (
+              <div className="logistics-info">
+                <h3>🚇 Transport & Logistics</h3>
+                <div className="logistics-grid">
+                  <div className="logistics-item">
+                    <strong>Recommended Transport:</strong>
+                    <span>{tripData.logistics.transportMethod}</span>
+                  </div>
+                  <div className="logistics-item">
+                    <strong>Total Walking Time:</strong>
+                    <span>{tripData.logistics.totalWalkingTime}</span>
+                  </div>
+                  <div className="logistics-item">
+                    <strong>Weather Backup Plan:</strong>
+                    <span>{tripData.logistics.weatherBackup}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {tripData.mealPlanning && (
+              <div className="meal-planning">
+                <h3>🍽️ Meal Planning</h3>
+                <div className="meal-grid">
+                  {tripData.mealPlanning.breakfast && (
+                    <div className="meal-item">
+                      <strong>Breakfast:</strong>
+                      <span>{tripData.mealPlanning.breakfast}</span>
+                    </div>
+                  )}
+                  <div className="meal-item">
+                    <strong>Lunch:</strong>
+                    <span>{tripData.mealPlanning.lunch}</span>
+                  </div>
+                  <div className="meal-item">
+                    <strong>Snacks:</strong>
+                    <span>{tripData.mealPlanning.snacks}</span>
+                  </div>
+                  {tripData.mealPlanning.dietary && (
+                    <div className="meal-item dietary">
+                      <strong>Dietary Notes:</strong>
+                      <span>{tripData.mealPlanning.dietary}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {tripData.emergencyInfo && (
+              <div className="emergency-info">
+                <h3>🏥 Emergency Information</h3>
+                <div className="emergency-grid">
+                  <div className="emergency-item">
+                    <strong>Nearest Hospital:</strong>
+                    <span>{tripData.emergencyInfo.nearestHospital}</span>
+                  </div>
+                  <div className="emergency-item">
+                    <strong>Pharmacies:</strong>
+                    <span>{tripData.emergencyInfo.pharmacies}</span>
+                  </div>
+                  <div className="emergency-item">
+                    <strong>Public Toilets:</strong>
+                    <span>{tripData.emergencyInfo.toilets}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="itinerary">
               <div className="itinerary-header">
                 <h3>Your Itinerary</h3>
@@ -882,6 +954,47 @@ function App() {
                     <div className="activity-details">
                       <h4>{activity.title}</h4>
                       <p>{activity.description}</p>
+                      
+                      {/* Enhanced details from AI */}
+                      {activity.location && (
+                        <div className="activity-location">
+                          <strong>📍 Location:</strong> {activity.location.address}
+                          {activity.location.nearestTube && (
+                            <span className="tube-info"> • 🚇 {activity.location.nearestTube}</span>
+                          )}
+                        </div>
+                      )}
+                      
+                      {activity.crowdLevel && (
+                        <div className="crowd-level">
+                          <strong>👥 Crowd Level:</strong> {activity.crowdLevel}
+                        </div>
+                      )}
+                      
+                      {activity.costEstimate && (
+                        <div className="cost-estimate">
+                          <strong>💰 Cost:</strong> {activity.costEstimate}
+                        </div>
+                      )}
+                      
+                      {activity.childEngagement && (
+                        <div className="child-engagement">
+                          <strong>🎯 Keep Kids Engaged:</strong> {activity.childEngagement}
+                        </div>
+                      )}
+                      
+                      {activity.practicalTips && (
+                        <div className="practical-tips">
+                          <strong>💡 Tips:</strong> {activity.practicalTips}
+                        </div>
+                      )}
+                      
+                      {activity.transportToNext && (
+                        <div className="transport-next">
+                          <strong>🚶‍♀️ To Next Activity:</strong> {activity.transportToNext}
+                        </div>
+                      )}
+                      
                       <div className="activity-meta">
                         <span className="budget-indicator">Budget: {activity.budgetLevel}</span>
                         <span className="activity-number">Activity {index + 1}</span>
