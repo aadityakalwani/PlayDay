@@ -292,14 +292,103 @@ function App() {
   const generateMockItinerary = async (formData) => {
 
     const prompt = `
-      You are an expert London tour guide for families. Create a detailed, timed itinerary for a family day out in London based on these requirements:
-      - Date: ${new Date(formData.date).toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-      - Time Frame: From ${formatTimeRange([formData.timeRange[0], 0]).split(' - ')[0]} to ${formatTimeRange([formData.timeRange[1], 0]).split(' - ')[0]}.
-      - Children: ${formData.children.map((child, i) => `Child ${i+1} is age ${child.age}${child.preferences ? `, with these preferences: ${child.preferences}` : ''}`).join('; ')}.
-      - Main Interests: ${formData.interests.join(', ')}.
-      - Budget Level: ${formData.budget}.
+      You are London's most experienced family tour guide with 20+ years of expertise. Create a meticulously planned, timed itinerary for a family day out in London. Consider EVERY detail to ensure a smooth, enjoyable experience.
 
-      Please provide a response in a structured JSON format. The JSON object should have a key named "activities" which is an array of objects. Each activity object must have the following keys: "time" (e.g., "9:00 AM"), "duration" (e.g., "2 hours"), "title" (e.g., "Natural History Museum"), and "description" (a brief, kid-friendly explanation of why this activity was chosen). Do not include any text or explanations outside of the JSON object.
+      === FAMILY DETAILS ===
+      • Date & Weather: ${new Date(formData.date).toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} (consider typical London weather for this date and season)
+      • Time Frame: From ${formatTimeRange([formData.timeRange[0], 0]).split(' - ')[0]} to ${formatTimeRange([formData.timeRange[1], 0]).split(' - ')[0]}
+      • Children: ${formData.children.map((child, i) => {
+        const age = child.age;
+        const ageGroup = age <= 3 ? "Toddler" : age <= 6 ? "Preschooler" : age <= 10 ? "Primary School" : age <= 14 ? "Tween" : "Teenager";
+        return `Child ${i+1}: ${age} years old (${ageGroup})${child.preferences ? `, Special notes: ${child.preferences}` : ''}`;
+      }).join('; ')}
+      • Primary Interests: ${formData.interests.join(', ')}
+      • Budget Level: ${formData.budget} (£ = budget-conscious, ££ = moderate, £££ = comfortable, ££££ = luxury)
+
+      === CRITICAL CONSIDERATIONS ===
+      🚇 TRANSPORT & LOGISTICS:
+      - Calculate realistic travel times between locations using London public transport
+      - Consider rush hour periods (8-9:30am, 5-7pm) and plan accordingly
+      - Factor in walking distances from stations to venues
+      - Include transport costs in budget considerations
+      - Suggest the most family-friendly routes (lifts vs stairs, step-free access)
+
+      👥 CROWD MANAGEMENT:
+      - Identify peak times for each venue and suggest optimal visiting windows
+      - Recommend advance bookings where necessary
+      - Consider school holiday periods and weekend crowds
+      - Suggest alternative routes through popular areas to avoid bottlenecks
+
+      🍽️ DIETARY & HEALTH:
+      - Include meal planning with child-friendly options
+      - Consider common allergies (nuts, dairy, gluten) and dietary restrictions
+      - Suggest venues with good baby/toddler facilities if applicable
+      - Plan for snack breaks and hydration stops
+
+      🌦️ WEATHER CONTINGENCIES:
+      - Include indoor backup options for each outdoor activity
+      - Consider seasonal factors (daylight hours, temperature, typical weather patterns)
+      - Suggest appropriate clothing recommendations
+
+      👶 AGE-APPROPRIATE LOGISTICS:
+      - Consider nap times for younger children
+      - Include toilet break planning
+      - Factor in attention spans (toddlers: 15-30min, school age: 1-2hrs)
+      - Suggest stroller-friendly routes if needed
+
+      💰 BUDGET OPTIMIZATION:
+      - Look for family discounts, free activities, and combo tickets
+      - Consider packed lunch options vs restaurant costs
+      - Include realistic cost estimates for the day
+      - Suggest money-saving tips specific to chosen activities
+
+      🎯 ENGAGEMENT STRATEGIES:
+      - Tailor each activity explanation to the children's ages and interests
+      - Include interactive elements and hands-on experiences
+      - Suggest conversation starters and educational opportunities
+      - Plan variety in activity types (active, educational, creative, relaxing)
+
+      === OUTPUT REQUIREMENTS ===
+      Provide a structured JSON response with this exact format:
+      {
+        "summary": "A brief overview of the day and why these choices work perfectly for this family",
+        "logistics": {
+          "totalWalkingTime": "Estimated total walking time",
+          "transportMethod": "Recommended transport method (Oyster card, day pass, etc.)",
+          "weatherBackup": "Quick weather contingency summary"
+        },
+        "activities": [
+          {
+            "time": "9:00 AM",
+            "duration": "2 hours",
+            "title": "Activity Name",
+            "description": "Detailed, child-friendly explanation of the activity and why it's perfect for this family",
+            "location": {
+              "address": "Full address",
+              "nearestTube": "Nearest tube station with distance",
+              "accessibility": "Accessibility notes (lifts, ramps, etc.)"
+            },
+            "crowdLevel": "Low/Medium/High with time-specific notes",
+            "costEstimate": "£X-Y per person or family rate",
+            "childEngagement": "Specific tips for keeping these particular children engaged",
+            "practicalTips": "Booking requirements, what to bring, insider tips",
+            "transportToNext": "How to get to next activity (time and method)"
+          }
+        ],
+        "mealPlanning": {
+          "breakfast": "Suggestion if early start",
+          "lunch": "Recommended lunch spot with child-friendly options",
+          "snacks": "Strategic snack planning",
+          "dietary": "Allergy/dietary accommodation notes"
+        },
+        "emergencyInfo": {
+          "nearestHospital": "Closest hospital to main activity area",
+          "pharmacies": "24hr or nearby pharmacy options",
+          "toilets": "Public toilet locations along the route"
+        }
+      }
+
+      Make this THE definitive family day out plan that anticipates every possible need and challenge. Be specific, practical, and thorough.
     `;
 
     try {
@@ -338,52 +427,89 @@ function App() {
       const aiText = data?.candidates?.[0]?.content?.parts?.[0]?.text || 'AI response received but no text found.';
       console.log('Extracted AI Text:', aiText);
       
-      // Create fallback activities with TK prefix (these will be used until we can properly parse AI response)
-      const activities = [];
-      let currentTime = formData.timeRange[0];
+      // Try to parse the JSON response from Gemini
+      let parsedResponse = null;
+      let activities = [];
       
-      // Add activities based on interests - these are fallback activities
-      if (formData.interests.includes('Museums')) {
-        activities.push({
-          time: formatTimeRange([currentTime, currentTime]).split(' - ')[0],
-          title: 'TK Natural History Museum',
-          description: 'Explore dinosaurs and interactive exhibits',
-          duration: '2 hours',
-          budgetLevel: formData.budget
-        });
-        currentTime += 4;
+      try {
+        // Clean the response to extract JSON (remove markdown formatting if present)
+        const jsonMatch = aiText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          parsedResponse = JSON.parse(jsonMatch[0]);
+          console.log('Parsed AI Response:', parsedResponse);
+          
+          // Extract activities from the structured response
+          if (parsedResponse.activities && Array.isArray(parsedResponse.activities)) {
+            activities = parsedResponse.activities.map(activity => ({
+              time: activity.time,
+              title: activity.title,
+              description: activity.description,
+              duration: activity.duration,
+              budgetLevel: formData.budget,
+              // Store additional details for potential future use
+              location: activity.location,
+              crowdLevel: activity.crowdLevel,
+              costEstimate: activity.costEstimate,
+              childEngagement: activity.childEngagement,
+              practicalTips: activity.practicalTips,
+              transportToNext: activity.transportToNext
+            }));
+          }
+        }
+      } catch (parseError) {
+        console.error('Failed to parse AI JSON response:', parseError);
       }
       
-      if (formData.interests.includes('Parks') && currentTime < formData.timeRange[1] - 3) {
-        activities.push({
-          time: formatTimeRange([currentTime, currentTime]).split(' - ')[0],
-          title: 'TK Hyde Park Adventure',
-          description: 'Playground time and open space to run around',
-          duration: '1.5 hours',
-          budgetLevel: formData.budget
-        });
-        currentTime += 3;
-      }
-      
-      // Fallback activity if no others match
+      // Fallback activities with TK prefix if parsing failed or no activities found
       if (activities.length === 0) {
-        activities.push({
-          time: formatTimeRange([formData.timeRange[0], formData.timeRange[0]]).split(' - ')[0],
-          title: 'TK London Eye',
-          description: 'Family-friendly observation wheel with amazing views',
-          duration: '1 hour',
-          budgetLevel: formData.budget
-        });
+        console.log('Using fallback activities due to parsing failure or empty response');
+        let currentTime = formData.timeRange[0];
+        
+        // Add activities based on interests - these are fallback activities
+        if (formData.interests.includes('Museums')) {
+          activities.push({
+            time: formatTimeRange([currentTime, currentTime]).split(' - ')[0],
+            title: 'TK Natural History Museum',
+            description: 'Explore dinosaurs and interactive exhibits',
+            duration: '2 hours',
+            budgetLevel: formData.budget
+          });
+          currentTime += 4;
+        }
+        
+        if (formData.interests.includes('Parks') && currentTime < formData.timeRange[1] - 3) {
+          activities.push({
+            time: formatTimeRange([currentTime, currentTime]).split(' - ')[0],
+            title: 'TK Hyde Park Adventure',
+            description: 'Playground time and open space to run around',
+            duration: '1.5 hours',
+            budgetLevel: formData.budget
+          });
+          currentTime += 3;
+        }
+        
+        // Fallback activity if no others match
+        if (activities.length === 0) {
+          activities.push({
+            time: formatTimeRange([formData.timeRange[0], formData.timeRange[0]]).split(' - ')[0],
+            title: 'TK London Eye',
+            description: 'Family-friendly observation wheel with amazing views',
+            duration: '1 hour',
+            budgetLevel: formData.budget
+          });
+        }
       }
       
-      // Return data including the AI's raw response
+      // Return data including the AI's structured response
       return {
         date: formData.date,
         children: formData.children,
         activities,
         totalDuration: formatTimeRange(formData.timeRange),
         timeRange: formData.timeRange,
-        aiResponse: `AI says: "${aiText.trim()}"` // This is the raw AI output we'll display
+        aiResponse: parsedResponse ? 
+          `AI Planning Summary: ${parsedResponse.summary || 'Comprehensive itinerary generated successfully!'}` : 
+          `Raw AI Response: "${aiText.substring(0, 500)}${aiText.length > 500 ? '...' : ''}"`
       };
 
     } catch (error) {
