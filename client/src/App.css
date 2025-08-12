@@ -1257,23 +1257,27 @@ textarea {
 .logistics-item, .meal-item, .emergency-item {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-  padding: 0.75rem;
+  gap: 0.5rem;
+  padding: 1rem;
   background: white;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-left: 3px solid #4f46e5;
 }
 
 .logistics-item strong, .meal-item strong, .emergency-item strong {
-  color: #374151;
+  color: #4f46e5;
   font-size: 0.9rem;
   font-weight: 600;
+  margin-bottom: 0.25rem;
+  display: block;
 }
 
 .logistics-item span, .meal-item span, .emergency-item span {
-  color: #6b7280;
-  font-size: 0.9rem;
+  color: #1e293b;
+  font-size: 0.95rem;
   line-height: 1.4;
+  font-weight: 500;
 }
 
 .meal-item.dietary {
@@ -1320,17 +1324,29 @@ textarea {
 /* Responsive Design for New Sections */
 @media (min-width: 768px) {
   .logistics-grid, .meal-grid, .emergency-grid {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   }
   
   .logistics-item, .meal-item, .emergency-item {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    padding: 1rem;
   }
   
   .logistics-item strong, .meal-item strong, .emergency-item strong {
-    flex-shrink: 0;
-    margin-right: 1rem;
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+    color: #4f46e5;
+    display: block;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.25rem;
+  }
+  
+  .logistics-item span, .meal-item span, .emergency-item span {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: #1e293b;
+    font-weight: 500;
   }
 }
