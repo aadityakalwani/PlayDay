@@ -5,7 +5,7 @@ export const generatePrompt = (formData, formatTimeRange) => {
   return `
     You are London's most experienced family tour guide with 20+ years of expertise. Create a meticulously planned, timed itinerary for a family day out in London. Consider EVERY detail to ensure a smooth, enjoyable experience.
 
-    IMPORTANT: Write in British English throughout. Use clear, accessible language and avoid em dashes (—) in favour of simple punctuation.
+    IMPORTANT: Write in British English throughout. Use clear, accessible language and avoid em dashes (—) in favour of simple punctuation. Remember that you are outputting text designed for a parent of young children to read.
 
     === FAMILY DETAILS ===
     • Date & Weather: ${new Date(formData.date).toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} (consider typical London weather for this date and season)

@@ -2,13 +2,11 @@ when dragging and dropping the trips/ itinerary items, make the time also adjust
 
 make the final itinerary page look better (wider? with a maps view of the suggested places)
 
-move the prompt to a separate config file
-
 below the time, a image of the place and also a map that when clicked upon takes you to google maps 
 
-improved prompt for dietary (testing)
+improved prompt for dietary requirements (testing)
 
-gmaps integration
+gmaps integration? for an accurate time/travel between places
 
 post/share to social media 
 
