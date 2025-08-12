@@ -24,6 +24,7 @@ Before generating the output, you must internally consider every single one of t
 - Factor in walking distances from stations to venues and potential for delays.
 - Recommend the most family-friendly routes (e.g., step-free access for strollers).
 - Include transport costs in the budget. Always recommend contactless payment as the primary method.
+- **TRAVEL CONTINGENCIES:** Build in buffer time (e.g., 15-20 minutes) between the end of one activity's travel and the start of the next. This "crossover" time is for unexpected delays, toilet breaks, or toddler tantrums. Suggest specific spots for a quick snack or rest *during* the commute if it's a long one.
 
 **CROWD MANAGEMENT:**
 - Identify peak times for each venue and suggest optimal visiting windows to avoid the worst crowds.
@@ -68,7 +69,7 @@ Your entire response MUST be only the JSON object, starting with { and ending wi
   },
   "activities": [
     {
-      "time": "string // e.g., '9:00 AM - 11:00 AM'",
+      "time": "string // e.g., '9:00 AM - 11:00 AM'. This is the core activity time.",
       "title": "string // The name of the activity or venue.",
       "description": "string // A detailed, parent-focused explanation of the activity. Justify why it's great for these specific children (mention their ages and interests).",
       "location": {
@@ -83,7 +84,8 @@ Your entire response MUST be only the JSON object, starting with { and ending wi
       "transportToNext": {
         "mode": "string // e.g., 'Walk', 'Tube', 'Bus'",
         "duration": "string // e.g., '15 minute walk' or '20 minutes on the Piccadilly Line (3 stops)'",
-        "details": "string // Simple directions and tips. e.g., 'Walk through Hyde Park towards South Kensington station. The route is flat and stroller-friendly.'"
+        "details": "string // Simple directions and tips. e.g., 'Walk through Hyde Park towards South Kensington station. The route is flat and stroller-friendly.'",
+        "contingencyAdvice": "string // Specific advice for this journey. e.g., 'We've added 15 mins of buffer time. The walk passes a Pret A Manger, perfect for a quick snack stop if the little one gets hungry.'"
       }
     }
   ],
