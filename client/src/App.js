@@ -375,7 +375,8 @@ function App() {
           
           // Extract activities from the structured response
           if (parsedResponse.activities && Array.isArray(parsedResponse.activities)) {
-            activities = parsedResponse.activities.map(activity => ({
+            activities = parsedResponse.activities.map((activity, index) => ({
+              id: `activity-${Date.now()}-${index}`, // Add unique ID
               time: activity.time,
               title: activity.title,
               description: activity.description,
@@ -403,6 +404,7 @@ function App() {
         // Add activities based on interests - these are fallback activities
         if (formData.interests.includes('Museums')) {
           activities.push({
+            id: `fallback-museum-${Date.now()}`, // Add unique ID
             time: formatTimeRange([currentTime, currentTime]).split(' - ')[0],
             title: 'TK Natural History Museum',
             description: 'Explore dinosaurs and interactive exhibits',
@@ -415,6 +417,7 @@ function App() {
         
         if (formData.interests.includes('Parks') && currentTime < formData.timeRange[1] - 3) {
           activities.push({
+            id: `fallback-park-${Date.now()}`, // Add unique ID
             time: formatTimeRange([currentTime, currentTime]).split(' - ')[0],
             title: 'TK Hyde Park Adventure',
             description: 'Playground time and open space to run around',
@@ -428,6 +431,7 @@ function App() {
         // Fallback activity if no others match
         if (activities.length === 0) {
           activities.push({
+            id: `fallback-londoneye-${Date.now()}`, // Add unique ID
             time: formatTimeRange([formData.timeRange[0], formData.timeRange[0]]).split(' - ')[0],
             title: 'TK London Eye',
             description: 'Family-friendly observation wheel with amazing views',
@@ -465,7 +469,7 @@ function App() {
         const transportCost = 15; // Rough daily transport cost for a family
         totalCost += transportCost;
         
-        return hasCosts && totalCost > 0 ? `£${totalCost} (estimated)` : 'Cost estimates being calculated...';
+        return hasCosts && totalCost > 0 ? `£${totalCost}` : 'Cost estimates being calculated...';
       };
       
       // Return data including the AI's structured response
@@ -503,6 +507,7 @@ function App() {
         children: formData.children,
         activities: [
           {
+            id: `fallback-error-${Date.now()}`, // Add unique ID
             time: formatTimeRange([formData.timeRange[0], formData.timeRange[0]]).split(' - ')[0],
             title: 'TK London Eye',
             description: 'Family-friendly observation wheel with amazing city views',
@@ -637,10 +642,10 @@ function App() {
   };
 
   // Helper function to get place images from our backend
-  const getPlaceImage = async (placeName, index) => {
+  const getPlaceImage = async (placeName, activityId) => {
     // Return cached image if available
-    if (activityImages[index]) {
-      return activityImages[index];
+    if (activityImages[activityId]) {
+      return activityImages[activityId];
     }
 
     try {
@@ -652,8 +657,8 @@ function App() {
 
       if (response.ok) {
         const data = await response.json();
-        // Cache the fetched image URL
-        setActivityImages(prev => ({ ...prev, [index]: data.imageUrl }));
+        // Cache the fetched image URL using activityId
+        setActivityImages(prev => ({ ...prev, [activityId]: data.imageUrl }));
         return data.imageUrl;
       }
     } catch (error) {
@@ -669,8 +674,8 @@ function App() {
     if (tripData && tripData.activities) {
       setImageLoading(true);
       const fetchAllImages = async () => {
-        const imagePromises = tripData.activities.map((activity, index) => 
-          getPlaceImage(activity.title, index)
+        const imagePromises = tripData.activities.map((activity) => 
+          getPlaceImage(activity.title, activity.id)
         );
         await Promise.all(imagePromises);
         setImageLoading(false);
@@ -960,7 +965,7 @@ function App() {
                         <div className="image-placeholder">Loading...</div>
                       ) : (
                         <img 
-                          src={activityImages[index]} 
+                          src={activityImages[activity.id]} 
                           alt={activity.title}
                           className="place-image"
                           onError={(e) => {
@@ -1059,8 +1064,8 @@ function App() {
                 <h3>💰 Total Estimated Cost</h3>
                 <div className="cost-display">
                   <span className="cost-amount">{tripData.overallBudget}</span>
-                  <p className="cost-note">This includes activities, meals, and transport costs based on your selected budget level.</p>
                 </div>
+                  <p className="cost-note">This estimated cost factors in activities, meals, and transport costs based on your selected budget level.</p>
               </div>
             )}
 

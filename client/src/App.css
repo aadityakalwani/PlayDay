@@ -683,7 +683,7 @@ textarea {
 
 .activity-card {
   display: grid;
-  grid-template-columns: 300px 1fr;
+  grid-template-columns: 350px 1fr;
   grid-template-rows: auto auto 1fr;
   gap: 1rem;
   padding: 1.5rem;

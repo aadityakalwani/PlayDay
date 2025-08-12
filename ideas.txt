@@ -15,3 +15,33 @@ remove the part of the itinerary page that says:
     as if it still was the form paege
 
 Chatbot -> "what can this app do" (Kulbir)
+
+consider how many parents there are
+
+journey summary at the top
+
+short summary view of activities one after eachother → very simple summary
+
+suggested waiting period
+
+
+system commands
+- “claude, follow these commands”
+- this is like a system prompt for copillot to help me build rather than doing what it wants to do
+- eg. brainstorm 4 items, then suggest the best one, take my permission and then execute…
+
+have children inside of a toggle
+same for activities on the generated itinerary
+
+ability to remember the user or add in a profile (so it learns I have a 3 year old child)
+
+add error handling if error 503 gemini is busy then recreate and try again
+“*AI Error: Service unavailable (503). The model is loading, please wait. Response: { "error": { "code": 503, "message": "The model is overloaded. Please try again later.", "status": "UNAVAILABLE" } } . Using fallback recommendations.”*
+
+improved/more accurate pricing eg. for the tube
+
+list of where the walking time is actually coming from
+
+if something in the form was incorrect (eg. no date seleted) then show an error message to the suer above the ‘build my trip button’ so they don’t have to scroll
+
+what if I don’t like any of the activities? add in maybe two options and you clickw ith one you prefer, or that it will ’try again’ on a certain option and take a new place (another request to gemini)
