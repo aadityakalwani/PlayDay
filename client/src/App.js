@@ -527,6 +527,51 @@ function App() {
     e.preventDefault();
   };
 
+  // Helper function to convert duration string to half-hour increments
+  const durationToHalfHours = (duration) => {
+    if (!duration) return 2; // default 1 hour
+    
+    // Parse strings like "2 hours", "1 hour 30 mins", "45 mins"
+    const hourMatch = duration.match(/(\d+)\s*hours?/i);
+    const minMatch = duration.match(/(\d+)\s*mins?/i);
+    
+    let totalMinutes = 0;
+    if (hourMatch) totalMinutes += parseInt(hourMatch[1]) * 60;
+    if (minMatch) totalMinutes += parseInt(minMatch[1]);
+    
+    // If no matches found, try to parse decimal hours like "1.5 hours"
+    if (totalMinutes === 0) {
+      const decimalMatch = duration.match(/(\d+\.?\d*)\s*hours?/i);
+      if (decimalMatch) {
+        totalMinutes = parseFloat(decimalMatch[1]) * 60;
+      }
+    }
+    
+    // Convert to half-hour increments (round up to nearest 30 minutes)
+    return totalMinutes > 0 ? Math.ceil(totalMinutes / 30) : 2;
+  };
+
+  // Helper function to recalculate activity times after reordering
+  const recalculateActivityTimes = (activities, startTimeIndex) => {
+    let currentTime = startTimeIndex;
+    
+    return activities.map(activity => {
+      const duration = durationToHalfHours(activity.duration);
+      const startTime = currentTime;
+      const endTime = currentTime + duration;
+      
+      // Format the new time range
+      const newTimeRange = `${formatTimeRange([startTime, startTime]).split(' - ')[0]} - ${formatTimeRange([endTime, endTime]).split(' - ')[0]}`;
+      
+      currentTime = endTime; // Next activity starts when this one ends
+      
+      return {
+        ...activity,
+        time: newTimeRange
+      };
+    });
+  };
+
   const handleDrop = (e, dropIndex) => {
     e.preventDefault();
     const dragIndex = parseInt(e.dataTransfer.getData('text/plain'));
@@ -540,9 +585,13 @@ function App() {
     newActivities.splice(dragIndex, 1);
     newActivities.splice(dropIndex, 0, draggedItem);
     
+    // Recalculate times for all activities based on the trip's start time
+    const startTimeIndex = tripData.timeRange ? tripData.timeRange[0] : 18; // default to 9 AM if not available
+    const activitiesWithNewTimes = recalculateActivityTimes(newActivities, startTimeIndex);
+    
     setTripData({
       ...tripData,
-      activities: newActivities
+      activities: activitiesWithNewTimes
     });
   };
 

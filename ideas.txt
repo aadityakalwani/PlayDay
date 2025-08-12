@@ -1,4 +1,4 @@
-when dragging and dropping the trips/ itinerary items, make the time also adjust
+
 
 make the final itinerary page have a maps view of the suggested places
 
