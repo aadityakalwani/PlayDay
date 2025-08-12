@@ -36,6 +36,10 @@ function App() {
   // track personal notes for activities
   const [activityNotes, setActivityNotes] = useState({});
 
+  // Store fetched image URLs
+  const [activityImages, setActivityImages] = useState({});
+  const [imageLoading, setImageLoading] = useState(true);
+
   // custom date picker state
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
@@ -461,7 +465,7 @@ function App() {
         const transportCost = 15; // Rough daily transport cost for a family
         totalCost += transportCost;
         
-        return hasCosts && totalCost > 0 ? `£${totalCost} (including transport)` : 'Cost estimates being calculated...';
+        return hasCosts && totalCost > 0 ? `£${totalCost} (estimated)` : 'Cost estimates being calculated...';
       };
       
       // Return data including the AI's structured response
@@ -632,32 +636,48 @@ function App() {
     }
   };
 
-  // Helper function to get place images (basic version with fallbacks)
-  const getPlaceImage = (placeName) => {
-    // Simple fallback based on keywords for demonstration
-    const keywords = placeName.toLowerCase();
-    
-    if (keywords.includes('museum') || keywords.includes('natural history')) {
-      return 'https://images.unsplash.com/photo-1565911494207-8740e7d0a05a?w=400&h=250&fit=crop';
-    } else if (keywords.includes('park') || keywords.includes('playground') || keywords.includes('hyde')) {
-      return 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=250&fit=crop';
-    } else if (keywords.includes('london eye')) {
-      return 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=400&h=250&fit=crop';
-    } else if (keywords.includes('tower') || keywords.includes('castle')) {
-      return 'https://images.unsplash.com/photo-1529655683826-aba9b3e77383?w=400&h=250&fit=crop';
-    } else if (keywords.includes('market') || keywords.includes('food')) {
-      return 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&h=250&fit=crop';
-    } else if (keywords.includes('zoo') || keywords.includes('animal')) {
-      return 'https://images.unsplash.com/photo-1549366021-9f761d040a94?w=400&h=250&fit=crop';
-    } else if (keywords.includes('gallery') || keywords.includes('art')) {
-      return 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=400&h=250&fit=crop';
-    } else if (keywords.includes('theatre') || keywords.includes('show')) {
-      return 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=250&fit=crop';
+  // Helper function to get place images from our backend
+  const getPlaceImage = async (placeName, index) => {
+    // Return cached image if available
+    if (activityImages[index]) {
+      return activityImages[index];
+    }
+
+    try {
+      const response = await fetch('http://localhost:3001/api/get-place-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ placeName }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        // Cache the fetched image URL
+        setActivityImages(prev => ({ ...prev, [index]: data.imageUrl }));
+        return data.imageUrl;
+      }
+    } catch (error) {
+      console.error('Error fetching image:', error);
     }
     
-    // Default London landmark image
+    // Return a default fallback image on error
     return 'https://images.unsplash.com/photo-1520637836862-4d197d17c35a?w=400&h=250&fit=crop';
   };
+
+  // Effect to pre-fetch images when trip data is available
+  useEffect(() => {
+    if (tripData && tripData.activities) {
+      setImageLoading(true);
+      const fetchAllImages = async () => {
+        const imagePromises = tripData.activities.map((activity, index) => 
+          getPlaceImage(activity.title, index)
+        );
+        await Promise.all(imagePromises);
+        setImageLoading(false);
+      };
+      fetchAllImages();
+    }
+  }, [tripData]);
 
   return (
     <div className="App">
@@ -919,6 +939,7 @@ function App() {
                       <div className="drag-handle">
                         <span className="drag-icon">⋮⋮</span>
                       </div>
+                      <span className="activity-number">Activity {index + 1}</span>
                       <div className="activity-checkbox">
                         <input
                           type="checkbox"
@@ -935,14 +956,18 @@ function App() {
                     </div>
                     
                     <div className="activity-image">
-                      <img 
-                        src={getPlaceImage(activity.title)} 
-                        alt={activity.title}
-                        className="place-image"
-                        onError={(e) => {
-                          e.target.src = 'https://images.unsplash.com/photo-1520637836862-4d197d17c35a?w=400&h=250&fit=crop';
-                        }}
-                      />
+                      {imageLoading ? (
+                        <div className="image-placeholder">Loading...</div>
+                      ) : (
+                        <img 
+                          src={activityImages[index]} 
+                          alt={activity.title}
+                          className="place-image"
+                          onError={(e) => {
+                            e.target.src = 'https://images.unsplash.com/photo-1520637836862-4d197d17c35a?w=400&h=250&fit=crop';
+                          }}
+                        />
+                      )}
                     </div>
                     
                     <div className="activity-details">
@@ -1004,10 +1029,6 @@ function App() {
                           )}
                         </div>
                       )}
-                      
-                      <div className="activity-meta">
-                        <span className="activity-number">Activity {index + 1}</span>
-                      </div>
                       
                       <div className="activity-notes">
                         <textarea
