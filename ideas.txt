@@ -1,16 +1,13 @@
-
-
-make the final itinerary page have a maps view of the suggested places
-
 below the time, a image of the place and also a map that when clicked upon takes you to google maps 
 
 gmaps integration? for an accurate time/travel between places
+make the final itinerary page have a maps view of the suggested places
 
 some loading banner or distraction whilst the program is thinking of how to build the itinerary
 
 post/share to social media 
 
-Chatbot -> "what can this app do" (Kulbir)
-
 sprinkle some icons / images / emojis 
 - split interests into themes?
+
+Chatbot -> "what can this app do" (Kulbir)
