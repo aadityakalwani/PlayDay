@@ -632,6 +632,33 @@ function App() {
     }
   };
 
+  // Helper function to get place images (basic version with fallbacks)
+  const getPlaceImage = (placeName) => {
+    // Simple fallback based on keywords for demonstration
+    const keywords = placeName.toLowerCase();
+    
+    if (keywords.includes('museum') || keywords.includes('natural history')) {
+      return 'https://images.unsplash.com/photo-1565911494207-8740e7d0a05a?w=400&h=250&fit=crop';
+    } else if (keywords.includes('park') || keywords.includes('playground') || keywords.includes('hyde')) {
+      return 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=250&fit=crop';
+    } else if (keywords.includes('london eye')) {
+      return 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=400&h=250&fit=crop';
+    } else if (keywords.includes('tower') || keywords.includes('castle')) {
+      return 'https://images.unsplash.com/photo-1529655683826-aba9b3e77383?w=400&h=250&fit=crop';
+    } else if (keywords.includes('market') || keywords.includes('food')) {
+      return 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&h=250&fit=crop';
+    } else if (keywords.includes('zoo') || keywords.includes('animal')) {
+      return 'https://images.unsplash.com/photo-1549366021-9f761d040a94?w=400&h=250&fit=crop';
+    } else if (keywords.includes('gallery') || keywords.includes('art')) {
+      return 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=400&h=250&fit=crop';
+    } else if (keywords.includes('theatre') || keywords.includes('show')) {
+      return 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=250&fit=crop';
+    }
+    
+    // Default London landmark image
+    return 'https://images.unsplash.com/photo-1520637836862-4d197d17c35a?w=400&h=250&fit=crop';
+  };
+
   return (
     <div className="App">
       <header className="App-header">
@@ -791,7 +818,7 @@ function App() {
             </div>
 
             <div className="form-section">
-              <label>What are you interested in?</label>
+              <label>What are you and your family interested in?</label>
               <div className="button-group">
                 {/* create a button for each interest option */}
                 {['🏛️ Museums & Learning', '🌳 Parks & Playgrounds', '🍽️ Great Food Spots', '💎 Hidden Gems', '🎨 Art & Creativity', '🎭 Shows & Entertainment', '🛒 Markets & Shopping', '🦁 Animals & Wildlife', '🚀 Adventure & Thrills', '🏰 History & Castles', '🎡 Theme Parks', '🚢 River & Boats', '🍰 Sweet Treats', '📚 Story Time & Books', '⚽ Sports & Activities'].map(interest => (
@@ -888,22 +915,34 @@ function App() {
                     onDragOver={handleDragOver}
                     onDrop={(e) => handleDrop(e, index)}
                   >
-                    <div className="drag-handle">
-                      <span className="drag-icon">⋮⋮</span>
-                    </div>
-                    
-                    <div className="activity-checkbox">
-                      <input
-                        type="checkbox"
-                        checked={completedActivities.has(index)}
-                        onChange={() => toggleActivityCompletion(index)}
-                        className="activity-check"
-                      />
+                    <div className="activity-controls">
+                      <div className="drag-handle">
+                        <span className="drag-icon">⋮⋮</span>
+                      </div>
+                      <div className="activity-checkbox">
+                        <input
+                          type="checkbox"
+                          checked={completedActivities.has(index)}
+                          onChange={() => toggleActivityCompletion(index)}
+                          className="activity-check"
+                        />
+                      </div>
                     </div>
                     
                     <div className="activity-time">
                       <span className="time">{activity.time}</span>
                       <span className="duration">Duration: {activity.duration}</span>
+                    </div>
+                    
+                    <div className="activity-image">
+                      <img 
+                        src={getPlaceImage(activity.title)} 
+                        alt={activity.title}
+                        className="place-image"
+                        onError={(e) => {
+                          e.target.src = 'https://images.unsplash.com/photo-1520637836862-4d197d17c35a?w=400&h=250&fit=crop';
+                        }}
+                      />
                     </div>
                     
                     <div className="activity-details">

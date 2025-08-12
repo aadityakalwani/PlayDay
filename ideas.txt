@@ -10,4 +10,8 @@ post/share to social media
 sprinkle some icons / images / emojis 
 - split interests into themes?
 
+remove the part of the itinerary page that says:
+    "Fill in the details below to plan your perfect day out in London with your children!"
+    as if it still was the form paege
+
 Chatbot -> "what can this app do" (Kulbir)
