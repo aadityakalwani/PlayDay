@@ -27,6 +27,10 @@ function App() {
   // either show one of the other, not both at the same time
   const [showResults, setShowResults] = useState(false);
 
+  // Loading states for user feedback
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingStatus, setLoadingStatus] = useState('');
+
   // holds the generated itinerary data once the form is submitted
   const [tripData, setTripData] = useState(null);
 
@@ -257,6 +261,9 @@ function App() {
       return;
     }
 
+    setIsLoading(true);
+    setLoadingStatus('Building your perfect day...');
+
     // package up all the form data to send to the server
     const formData = {
       date,
@@ -279,16 +286,20 @@ function App() {
       if (response.ok) {
         const result = await response.json();
         
+        setLoadingStatus('Gemini is cooking your itinerary...');
         // create an AI-powered itinerary based on what they selected
         const mockItinerary = await generateMockItinerary(formData);
         setTripData(mockItinerary);
         setShowResults(true); // switch to showing the results page
+        setIsLoading(false);
       } else {
+        setIsLoading(false);
         alert('Error planning trip. Please try again.');
       }
     } catch (error) {
       // catches network errors or if server is down
       console.error('Error:', error);
+      setIsLoading(false);
       alert('Error connecting to server. Please try again.');
     }
   };
@@ -323,7 +334,9 @@ function App() {
   };
 
   // creates an AI-powered itinerary using Hugging Face
-  const generateMockItinerary = async (formData) => {
+  const generateMockItinerary = async (formData, retryCount = 0) => {
+    const maxRetries = 5;
+    const retryDelay = 2000; // 2 seconds
 
     const prompt = generatePrompt(formData, formatTimeRange);
 
@@ -349,7 +362,23 @@ function App() {
         if (response.status === 404) {
           throw new Error(`Model not found (404). The model might not be available or needs to be loaded. Response: ${errorText}`);
         } else if (response.status === 503) {
-          throw new Error(`Service unavailable (503). The model is loading, please wait. Response: ${errorText}`);
+          // Handle 503 errors with automatic retry logic
+          if (retryCount < maxRetries) {
+            console.log(`Gemini API overloaded (503). Attempt ${retryCount + 1} of ${maxRetries + 1}. Retrying in ${retryDelay/1000} seconds...`);
+            
+            setLoadingStatus(`503 error. Retrying in 2 seconds... (Attempt ${retryCount + 1} of ${maxRetries + 1})`);
+            
+            // Wait for the retry delay
+            await new Promise(resolve => setTimeout(resolve, retryDelay));
+            
+            setLoadingStatus('Gemini is cooking your itinerary...');
+            
+            // Recursive call with incremented retry count
+            return await generateMockItinerary(formData, retryCount + 1);
+          } else {
+            // Max retries reached, throw error to use fallback
+            throw new Error(`Service unavailable (503). The model is overloaded after ${maxRetries + 1} attempts. Response: ${errorText}`);
+          }
         } else {
           throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
         }
@@ -500,6 +529,8 @@ function App() {
 
     } catch (error) {
       console.error('AI Error:', error);
+      
+      setLoadingStatus('Using fallback recommendations...');
       
       // Fallback if AI fails - all with TK prefix
       return {
@@ -666,7 +697,7 @@ function App() {
     }
     
     // Return a default fallback image on error
-    return 'https://images.unsplash.com/photo-1520637836862-4d197d17c35a?w=400&h=250&fit=crop';
+    return 'https://www.google.com/imgres?q=image%20of%20london&imgurl=https%3A%2F%2Fmedia.istockphoto.com%2Fid%2F1294454411%2Fphoto%2Flondon-symbols-with-big-ben-double-decker-buses-and-red-phone-booth-in-england-uk.jpg%3Fs%3D612x612%26w%3D0%26k%3D20%26c%3DIX4_XZC-_P60cq9ZZbxw1CbL68hlv1L5-r_vSgEfx4k%3D&imgrefurl=https%3A%2F%2Fwww.istockphoto.com%2Fphotos%2Flondon&docid=YjeuaRCYMx_u2M&tbnid=Ea1vY2b3HI0FtM&vet=12ahUKEwiPs7v90YWPAxU2SkEAHRpGG1IQM3oECC8QAA..i&w=612&h=408&hcb=2&ved=2ahUKEwiPs7v90YWPAxU2SkEAHRpGG1IQM3oECC8QAA';
   };
 
   // Effect to pre-fetch images when trip data is available
@@ -886,7 +917,9 @@ function App() {
               {errors.budget && <span className="error-message">{errors.budget}</span>}
             </div>
             
-            <button type="submit" className="submit-button">Build My Trip</button>
+            <button type="submit" className="submit-button" disabled={isLoading}>
+              {isLoading ? loadingStatus : 'Build My Trip'}
+            </button>
 
           </form>
         ) : (
