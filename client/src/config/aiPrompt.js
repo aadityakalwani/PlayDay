@@ -23,7 +23,7 @@ Before generating the output, you must internally consider every single one of t
 - Calculate realistic travel times between locations using London public transport (Tube/Bus).
 - Factor in walking distances from stations to venues and potential for delays.
 - Recommend the most family-friendly routes (e.g., step-free access for strollers).
-- Include transport costs in the budget. Always recommend contactless payment as the primary method.
+- Include transport costs in the budget. Always recommend contactless payment (bank card, phone, or watch) as the easiest method - no need for Oyster cards when you can tap contactless directly.
 - **TRAVEL CONTINGENCIES:** Build in buffer time (e.g., 15-20 minutes) between the end of one activity's travel and the start of the next. This "crossover" time is for unexpected delays, toilet breaks, or toddler tantrums. Suggest specific spots for a quick snack or rest *during* the commute if it's a long one.
 
 **CROWD MANAGEMENT:**
@@ -64,7 +64,7 @@ Your entire response MUST be only the JSON object, starting with { and ending wi
   "summary": "string // A vibrant, one-paragraph overview of the day's adventure, explaining why the chosen activities are a perfect match for this specific family's interests and children's ages.",
   "logistics": {
     "totalWalkingTime": "string // Estimated total walking time for the day, e.g. '45 minutes' or '1 hour 20 mins'.",
-    "transportAdvice": "string // Recommend using a contactless card or mobile payment for all London transport. Mention the best ticket options for the family (e.g., kids travel free under 11).",
+    "transportAdvice": "string // Recommend using contactless payment (bank card, phone, or watch) for all London transport - much easier than Oyster cards. Mention the best ticket options for the family (e.g., kids travel free under 11).",
     "weatherContingency": "string // A brief, practical backup plan in case of bad weather (e.g., 'If it rains, swap Hyde Park for the nearby Science Museum')."
   },
   "activities": [

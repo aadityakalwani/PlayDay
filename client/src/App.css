@@ -596,7 +596,7 @@ textarea {
   padding: 1.5rem;
   border-radius: 16px;
   border: 2px solid #0ea5e9;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
 
 .ai-response h3 {
@@ -648,7 +648,7 @@ textarea {
 
 .itinerary {
   background: white;
-  padding: 1.5rem;
+  padding: 1rem 1.5rem 1.5rem 1.5rem;
   border-radius: 16px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
