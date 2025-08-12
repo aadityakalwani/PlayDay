@@ -1,12 +1,12 @@
 when dragging and dropping the trips/ itinerary items, make the time also adjust
 
-make the final itinerary page look better (wider? with a maps view of the suggested places)
+make the final itinerary page have a maps view of the suggested places
 
 below the time, a image of the place and also a map that when clicked upon takes you to google maps 
 
-improved prompt for dietary requirements (testing)
-
 gmaps integration? for an accurate time/travel between places
+
+some loading banner or distraction whilst the program is thinking of how to build the itinerary
 
 post/share to social media 
 

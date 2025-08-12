@@ -352,8 +352,8 @@ function App() {
               location: activity.location,
               crowdLevel: activity.crowdLevel,
               costEstimate: activity.costEstimate,
-              childEngagement: activity.childEngagement,
-              practicalTips: activity.practicalTips,
+              childEngagement: activity.practicalInfo?.childEngagement || activity.childEngagement,
+              practicalTips: activity.practicalInfo?.accessibility || activity.practicalTips,
               transportToNext: activity.transportToNext
             }));
           }
@@ -410,8 +410,17 @@ function App() {
         totalDuration: formatTimeRange(formData.timeRange),
         timeRange: formData.timeRange,
         // Include the rich structured data from AI
-        logistics: parsedResponse?.logistics,
-        mealPlanning: parsedResponse?.mealPlanning,
+        logistics: parsedResponse?.logistics ? {
+          transportMethod: parsedResponse.logistics.transportAdvice,
+          totalWalkingTime: parsedResponse.logistics.overallBudget,
+          weatherBackup: parsedResponse.logistics.weatherContingency
+        } : parsedResponse?.logistics,
+        mealPlanning: parsedResponse?.mealPlan ? {
+          breakfast: null,
+          lunch: `${parsedResponse.mealPlan.lunch?.venue} (${parsedResponse.mealPlan.lunch?.time})`,
+          snacks: `${parsedResponse.mealPlan.snacks?.suggestion} (${parsedResponse.mealPlan.snacks?.time})`,
+          dietary: parsedResponse.mealPlan.lunch?.dietaryNotes
+        } : parsedResponse?.mealPlanning,
         emergencyInfo: parsedResponse?.emergencyInfo,
         aiResponse: parsedResponse ? 
           `AI Planning Summary: ${parsedResponse.summary || 'Comprehensive itinerary generated successfully!'}` : 
@@ -792,9 +801,16 @@ function App() {
                       {/* Enhanced details from AI */}
                       {activity.location && (
                         <div className="activity-location">
-                          <strong>📍 Location:</strong> {activity.location.address}
-                          {activity.location.nearestTube && (
-                            <span className="tube-info"> • 🚇 {activity.location.nearestTube}</span>
+                          <strong>📍 Location:</strong> 
+                          {typeof activity.location === 'string' ? (
+                            activity.location
+                          ) : (
+                            <>
+                              {activity.location.address}
+                              {activity.location.nearestTube && (
+                                <span className="tube-info"> • 🚇 {activity.location.nearestTube}</span>
+                              )}
+                            </>
                           )}
                         </div>
                       )}
@@ -813,19 +829,28 @@ function App() {
                       
                       {activity.childEngagement && (
                         <div className="child-engagement">
-                          <strong>🎯 Keep Kids Engaged:</strong> {activity.childEngagement}
+                          <strong>🎯 Keep Kids Engaged:</strong> {typeof activity.childEngagement === 'string' ? activity.childEngagement : JSON.stringify(activity.childEngagement)}
                         </div>
                       )}
                       
                       {activity.practicalTips && (
                         <div className="practical-tips">
-                          <strong>💡 Tips:</strong> {activity.practicalTips}
+                          <strong>💡 Tips:</strong> {typeof activity.practicalTips === 'string' ? activity.practicalTips : JSON.stringify(activity.practicalTips)}
                         </div>
                       )}
                       
                       {activity.transportToNext && (
                         <div className="transport-next">
-                          <strong>🚶‍♀️ To Next Activity:</strong> {activity.transportToNext}
+                          <strong>🚶‍♀️ To Next Activity:</strong> 
+                          {typeof activity.transportToNext === 'string' ? (
+                            activity.transportToNext
+                          ) : (
+                            <div>
+                              <div>{activity.transportToNext.mode} - {activity.transportToNext.duration}</div>
+                              {activity.transportToNext.details && <div>{activity.transportToNext.details}</div>}
+                              {activity.transportToNext.contingencyAdvice && <div><em>{activity.transportToNext.contingencyAdvice}</em></div>}
+                            </div>
+                          )}
                         </div>
                       )}
                       
