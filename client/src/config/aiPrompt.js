@@ -70,6 +70,7 @@ Your entire response MUST be only the JSON object, starting with { and ending wi
   "activities": [
     {
       "time": "string // e.g., '9:00 AM - 11:00 AM'. This is the core activity time.",
+      "duration": "string // e.g., '2 hours', '1 hour 30 mins', or '45 mins'. Use whole hours and minutes format, NOT decimals. The total time allocated for this activity (Based from the time above)",
       "title": "string // The name of the activity or venue.",
       "description": "string // A detailed, parent-focused explanation of the activity. Justify why it's great for these specific children (mention their ages and interests).",
       "location": {

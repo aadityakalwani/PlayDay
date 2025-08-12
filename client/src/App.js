@@ -289,6 +289,35 @@ function App() {
     }
   };
 
+  // Helper function to format duration from decimal hours to "X hours Y mins" format
+  const formatDuration = (duration) => {
+    if (!duration) return '1 hour';
+    
+    // If it's already in the right format, return as is
+    if (typeof duration === 'string' && (duration.includes('hour') || duration.includes('min'))) {
+      return duration;
+    }
+    
+    // Check if it's a decimal number (like "1.5" or "1.6666667")
+    const decimalMatch = duration.toString().match(/^(\d+\.?\d*)\s*hours?$/);
+    if (decimalMatch) {
+      const totalHours = parseFloat(decimalMatch[1]);
+      const hours = Math.floor(totalHours);
+      const minutes = Math.round((totalHours - hours) * 60);
+      
+      if (hours === 0) {
+        return `${minutes} mins`;
+      } else if (minutes === 0) {
+        return hours === 1 ? '1 hour' : `${hours} hours`;
+      } else {
+        const hourText = hours === 1 ? '1 hour' : `${hours} hours`;
+        return `${hourText} ${minutes} mins`;
+      }
+    }
+    
+    return duration; // fallback to original if no match
+  };
+
   // creates an AI-powered itinerary using Hugging Face
   const generateMockItinerary = async (formData) => {
 
@@ -346,7 +375,7 @@ function App() {
               time: activity.time,
               title: activity.title,
               description: activity.description,
-              duration: activity.duration,
+              duration: formatDuration(activity.duration) || '1 hour', // format duration properly
               budgetLevel: formData.budget,
               // Store additional details for potential future use
               location: activity.location,
@@ -791,7 +820,7 @@ function App() {
                     
                     <div className="activity-time">
                       <span className="time">{activity.time}</span>
-                      <span className="duration">{activity.duration}</span>
+                      <span className="duration">Duration: {activity.duration}</span>
                     </div>
                     
                     <div className="activity-details">
@@ -801,7 +830,7 @@ function App() {
                       {/* Enhanced details from AI */}
                       {activity.location && (
                         <div className="activity-location">
-                          <strong>📍 Location:</strong> 
+                          <strong>📍 Location: </strong> 
                           {typeof activity.location === 'string' ? (
                             activity.location
                           ) : (
