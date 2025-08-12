@@ -380,7 +380,7 @@ function App() {
               // Store additional details for potential future use
               location: activity.location,
               crowdLevel: activity.crowdLevel,
-              costEstimate: activity.costEstimate,
+              costEstimate: activity.practicalInfo?.estimatedCost || activity.costEstimate,
               childEngagement: activity.practicalInfo?.childEngagement || activity.childEngagement,
               practicalTips: activity.practicalInfo?.accessibility || activity.practicalTips,
               transportToNext: activity.transportToNext
@@ -403,7 +403,8 @@ function App() {
             title: 'TK Natural History Museum',
             description: 'Explore dinosaurs and interactive exhibits',
             duration: '2 hours',
-            budgetLevel: formData.budget
+            budgetLevel: formData.budget,
+            costEstimate: 'FREE'
           });
           currentTime += 4;
         }
@@ -414,7 +415,8 @@ function App() {
             title: 'TK Hyde Park Adventure',
             description: 'Playground time and open space to run around',
             duration: '1.5 hours',
-            budgetLevel: formData.budget
+            budgetLevel: formData.budget,
+            costEstimate: 'FREE'
           });
           currentTime += 3;
         }
@@ -426,10 +428,41 @@ function App() {
             title: 'TK London Eye',
             description: 'Family-friendly observation wheel with amazing views',
             duration: '1 hour',
-            budgetLevel: formData.budget
+            budgetLevel: formData.budget,
+            costEstimate: '£25'
           });
         }
       }
+      
+      // Calculate total estimated cost from individual activity costs
+      const calculateTotalCost = (activities) => {
+        let totalCost = 0;
+        let hasCosts = false;
+        
+        activities.forEach(activity => {
+          if (activity.costEstimate) {
+            hasCosts = true;
+            // Skip FREE activities
+            if (activity.costEstimate.toUpperCase().includes('FREE')) {
+              return;
+            }
+            
+            // Try to extract numeric values from cost strings like "£25", "£15 per person", "£25 for family"
+            const costMatches = activity.costEstimate.match(/£(\d+)/g);
+            if (costMatches) {
+              // Take the first/main cost mentioned
+              const mainCost = parseInt(costMatches[0].replace('£', ''));
+              totalCost += mainCost;
+            }
+          }
+        });
+        
+        // Add estimated transport costs (rough estimate)
+        const transportCost = 15; // Rough daily transport cost for a family
+        totalCost += transportCost;
+        
+        return hasCosts && totalCost > 0 ? `£${totalCost} (including transport)` : 'Cost estimates being calculated...';
+      };
       
       // Return data including the AI's structured response
       return {
@@ -441,9 +474,10 @@ function App() {
         // Include the rich structured data from AI
         logistics: parsedResponse?.logistics ? {
           transportMethod: parsedResponse.logistics.transportAdvice,
-          totalWalkingTime: parsedResponse.logistics.overallBudget,
+          totalWalkingTime: parsedResponse.logistics.totalWalkingTime,
           weatherBackup: parsedResponse.logistics.weatherContingency
         } : parsedResponse?.logistics,
+        overallBudget: calculateTotalCost(activities), // calculate total from individual activity costs
         mealPlanning: parsedResponse?.mealPlan ? {
           breakfast: null,
           lunch: `${parsedResponse.mealPlan.lunch?.venue} (${parsedResponse.mealPlan.lunch?.time})`,
@@ -910,6 +944,16 @@ function App() {
                 </button>
               </div>
             </div>
+
+            {tripData.overallBudget && (
+              <div className="cost-summary">
+                <h3>💰 Total Estimated Cost</h3>
+                <div className="cost-display">
+                  <span className="cost-amount">{tripData.overallBudget}</span>
+                  <p className="cost-note">This includes activities, meals, and transport costs based on your selected budget level.</p>
+                </div>
+              </div>
+            )}
 
             {tripData.logistics && (
               <div className="logistics-info">

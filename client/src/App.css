@@ -1199,7 +1199,7 @@ textarea {
 }
 
 /* Enhanced AI Information Sections */
-.logistics-info, .meal-planning, .emergency-info {
+.logistics-info, .meal-planning, .emergency-info, .cost-summary {
   margin: 1.5rem 0;
   padding: 1.5rem;
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
@@ -1207,11 +1207,45 @@ textarea {
   border-left: 4px solid #4f46e5;
 }
 
-.logistics-info h3, .meal-planning h3, .emergency-info h3 {
+.cost-summary {
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  border-left: 4px solid #10b981;
+  text-align: center;
+}
+
+.logistics-info h3, .meal-planning h3, .emergency-info h3, .cost-summary h3 {
   margin: 0 0 1rem 0;
   color: #1e293b;
   font-size: 1.2rem;
   font-weight: 600;
+}
+
+.cost-summary h3 {
+  color: #059669;
+}
+
+.cost-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cost-amount {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #059669;
+  background: white;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15);
+}
+
+.cost-note {
+  color: #6b7280;
+  font-size: 0.9rem;
+  margin: 0;
+  font-style: italic;
 }
 
 .logistics-grid, .meal-grid, .emergency-grid {

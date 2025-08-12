@@ -63,7 +63,7 @@ Your entire response MUST be only the JSON object, starting with { and ending wi
 {
   "summary": "string // A vibrant, one-paragraph overview of the day's adventure, explaining why the chosen activities are a perfect match for this specific family's interests and children's ages.",
   "logistics": {
-    "overallBudget": "string // An estimated total cost for the day in GBP (£), factoring in activities, food, and transport, based on the family's budget level.",
+    "totalWalkingTime": "string // Estimated total walking time for the day, e.g. '45 minutes' or '1 hour 20 mins'.",
     "transportAdvice": "string // Recommend using a contactless card or mobile payment for all London transport. Mention the best ticket options for the family (e.g., kids travel free under 11).",
     "weatherContingency": "string // A brief, practical backup plan in case of bad weather (e.g., 'If it rains, swap Hyde Park for the nearby Science Museum')."
   },
@@ -80,7 +80,8 @@ Your entire response MUST be only the JSON object, starting with { and ending wi
       "practicalInfo": {
         "booking": "string // Specific booking advice. e.g., 'Booking essential. Book online 2 weeks in advance for a 10% discount.' or 'No booking required.'",
         "accessibility": "string // Key family-friendly notes: 'Fully stroller accessible with lifts to all floors. Baby changing facilities on the ground floor.'",
-        "childEngagement": "string // A specific tip for keeping THESE children engaged. e.g., 'For the 4-year-old, head straight to the 'Pattern Pod' interactive gallery.'"
+        "childEngagement": "string // A specific tip for keeping THESE children engaged. e.g., 'For the 4-year-old, head straight to the 'Pattern Pod' interactive gallery.'",
+        "estimatedCost": "string // Estimated cost for this activity for the entire family, e.g. '£25 for 2 adults + 1 child' or 'FREE' or '£15 per person'"
       },
       "transportToNext": {
         "mode": "string // e.g., 'Walk', 'Tube', 'Bus'",
