@@ -10,25 +10,12 @@ post/share to social media
 sprinkle some icons / images / emojis 
 - split interests into themes?
 
-remove the part of the itinerary page that says:
-    "Fill in the details below to plan your perfect day out in London with your children!"
-    as if it still was the form paege
-
-Chatbot -> "what can this app do" (Kulbir)
-
 consider how many parents there are
 
 journey summary at the top
-
 short summary view of activities one after eachother → very simple summary
 
 suggested waiting period
-
-
-system commands
-- “claude, follow these commands”
-- this is like a system prompt for copillot to help me build rather than doing what it wants to do
-- eg. brainstorm 4 items, then suggest the best one, take my permission and then execute…
 
 have children inside of a toggle
 same for activities on the generated itinerary

@@ -688,7 +688,7 @@ function App() {
     <div className="App">
       <header className="App-header">
         <h1>PlayDay Trip Planner</h1>
-        <p>Fill in the details below to plan your perfect day out in London with your children!</p>
+        {!showResults && <p>Fill in the details below to plan your perfect day out in London with your children!</p>}
       </header>
 
       <main>
