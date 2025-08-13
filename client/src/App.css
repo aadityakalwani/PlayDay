@@ -470,13 +470,13 @@ textarea {
 
 /* Regenerate and Delete Buttons */
 .regenerate-button {
-  background-color: #e0e0e0;
-  color: #333;
-  font-size: 1rem;
+  background-color: #eef2ff;
+  color: #4f46e5;
+  flex-grow: 1; /* Take more space */
 }
 
 .regenerate-button:hover {
-  background-color: #d0d0d0;
+  background-color: #e0e7ff;
 }
 
 .regenerate-button:disabled {
@@ -485,9 +485,12 @@ textarea {
 }
 
 .delete-button {
-  background-color: #fbebeb;
-  color: #c53030;
-  font-size: 1rem;
+  background-color: #fef2f2;
+  color: #ef4444;
+}
+
+.delete-button:hover {
+  background-color: #fee2e2;
 }
 
 /* Child Form Styling */
@@ -705,44 +708,103 @@ textarea {
 
 .activity-card {
   display: grid;
-  grid-template-columns: 320px 1fr;
-  grid-template-rows: auto auto 1fr 1fr;
-  gap: 1rem;
-  padding: 1.5rem;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: auto auto 1fr auto; /* Adjusted for new controls */
+  gap: 15px;
+  background-color: #ffffff;
   border-radius: 12px;
-  border-left: 4px solid #4f46e5;
-  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  padding: 20px;
   position: relative;
-  cursor: grab;
-  border: 2px solid transparent;
-  min-height: 280px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
-.activity-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(79, 70, 229, 0.15);
-  border-color: #4f46e5;
+.activity-main-controls {
+  grid-column: 1 / -1; /* Span full width */
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
 }
 
-.activity-card:active {
-  cursor: grabbing;
+.control-button {
+  padding: 10px 15px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.activity-card.completed {
-  opacity: 0.7;
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-  border-left-color: #059669;
+.regenerate-button {
+  background-color: #eef2ff;
+  color: #4f46e5;
+  flex-grow: 1; /* Take more space */
 }
 
-.activity-card.completed .activity-details h4 {
-  text-decoration: line-through;
-  color: #059669;
+.regenerate-button:hover {
+  background-color: #e0e7ff;
+}
+
+.delete-button {
+  background-color: #fef2f2;
+  color: #ef4444;
+}
+
+.delete-button:hover {
+  background-color: #fee2e2;
+}
+
+.regeneration-form {
+  grid-column: 1 / -1;
+  background-color: #f8fafc;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  border: 1px solid #e2e8f0;
+}
+
+.regeneration-input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  font-size: 0.95rem;
+  margin-bottom: 10px;
+  resize: vertical;
+}
+
+.regeneration-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.submit-regeneration, .cancel-regeneration {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.submit-regeneration {
+  background-color: #4f46e5;
+  color: white;
+}
+
+.cancel-regeneration {
+  background-color: #e2e8f0;
+  color: #475569;
 }
 
 .activity-controls {
-  grid-column: 1;
-  grid-row: 1;
+  grid-column: 1 / -1;
   display: flex;
   justify-content: space-between;
   align-items: center;

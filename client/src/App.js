@@ -36,6 +36,9 @@ function App() {
 
   // track which activity is being regenerated
   const [regeneratingActivityId, setRegeneratingActivityId] = useState(null);
+  const [activityToRegenerate, setActivityToRegenerate] = useState(null); // For showing the input
+  const [regenerationReason, setRegenerationReason] = useState(''); // For the input text
+
 
   // track which activities are completed
   const [completedActivities, setCompletedActivities] = useState(new Set());
@@ -659,12 +662,26 @@ function App() {
     }
   };
 
-  const handleRegenerateActivity = async (activityIdToReplace) => {
+  const handleRegenerateClick = (activityId) => {
+    setActivityToRegenerate(activityId);
+    setRegenerationReason(''); // Reset reason when a new swap is initiated
+  };
+
+  const handleCancelRegeneration = () => {
+    setActivityToRegenerate(null);
+    setRegenerationReason('');
+  };
+
+  const submitRegeneration = async (activityIdToReplace) => {
     setRegeneratingActivityId(activityIdToReplace);
+    setActivityToRegenerate(null); // Hide the input form while processing
 
     const activityIndex = tripData.activities.findIndex(a => a.id === activityIdToReplace);
-    if (activityIndex === -1) return;
-
+    if (activityIndex === -1) {
+      setRegeneratingActivityId(null);
+      return;
+    }
+    
     const previousActivity = activityIndex > 0 ? tripData.activities[activityIndex - 1] : null;
     const nextActivity = activityIndex < tripData.activities.length - 1 ? tripData.activities[activityIndex + 1] : null;
     const activityToReplace = tripData.activities[activityIndex];
@@ -681,11 +698,14 @@ function App() {
       - The time slot for this activity is roughly: ${activityToReplace.time}.
       - The previous activity was: ${previousActivity ? `"${previousActivity.title}" at "${previousActivity.location.address}"` : 'This is the first activity of the day.'}
       - The next activity is: ${nextActivity ? `"${nextActivity.title}" at "${nextActivity.location.address}"` : 'This is the final activity of the day.'}
+      
+      ${regenerationReason ? `**User Feedback:** The user provided this reason for wanting a change: "${regenerationReason}"` : ''}
 
       **Your Task:**
       Suggest a single, new, family-friendly activity in London that fits the context above.
       - It MUST be different from "${activityToReplace.title}".
       - It should be geographically logical, considering the previous and next locations.
+      - Take the user's feedback into account if provided.
 
       **Output Format:**
       Your response MUST be a single JSON object for the new activity, in exactly this format. Do not include any other text or markdown.
@@ -779,6 +799,7 @@ function App() {
       alert(`There was an error swapping the activity. Please try again. \n\n${error.message}`);
     } finally {
       setRegeneratingActivityId(null);
+      setRegenerationReason('');
     }
   };
 
@@ -1235,35 +1256,42 @@ function App() {
                     onDragOver={handleDragOver}
                     onDrop={(e) => handleDrop(e, index)}
                   >
-                    <div className="activity-controls">
-                      <div className="drag-handle">
-                        <span className="drag-icon">⋮⋮</span>
-                      </div>
-                      <span className="activity-number">Activity {index + 1}</span>
+                    <div className="activity-main-controls">
                       <button
-                        onClick={() => handleRegenerateActivity(activity.id)}
+                        onClick={() => handleRegenerateClick(activity.id)}
                         className="control-button regenerate-button"
                         title="Swap this activity"
-                        disabled={regeneratingActivityId !== null}
+                        disabled={regeneratingActivityId !== null || activityToRegenerate !== null}
                       >
-                        {regeneratingActivityId === activity.id ? '...' : '🔄'}
+                        🔄 Swap Activity
                       </button>
                       <button
                         onClick={() => handleDeleteActivity(activity.id)}
                         className="control-button delete-button"
                         title="Delete this activity"
                       >
-                        🗑️
+                        🗑️ Delete
                       </button>
-                      <div className="activity-checkbox">
-                        <input
-                          type="checkbox"
-                          checked={completedActivities.has(index)}
-                          onChange={() => toggleActivityCompletion(index)}
-                          className="activity-check"
-                        />
-                      </div>
                     </div>
+
+                    {activityToRegenerate === activity.id && (
+                      <div className="regeneration-form">
+                        <textarea
+                          className="regeneration-input"
+                          placeholder="Optional: Why don't you like this? (e.g., 'Too crowded', 'kids prefer something more active')"
+                          value={regenerationReason}
+                          onChange={(e) => setRegenerationReason(e.target.value)}
+                        />
+                        <div className="regeneration-actions">
+                          <button onClick={() => submitRegeneration(activity.id)} className="submit-regeneration">
+                            Find New Activity
+                          </button>
+                          <button onClick={handleCancelRegeneration} className="cancel-regeneration">
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    )}
                     
                     <div className="activity-time">
                       <span className="time">{activity.time}</span>
