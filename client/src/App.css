@@ -1361,6 +1361,38 @@ textarea {
   font-weight: 500;
 }
 
+.walking-breakdown {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background: #f1f5f9;
+  border-radius: 8px;
+  border-left: 3px solid #3b82f6;
+}
+
+.breakdown-header {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.breakdown-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.breakdown-item {
+  padding: 0.25rem 0;
+  font-size: 0.8rem;
+  color: #4b5563;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.breakdown-item:last-child {
+  border-bottom: none;
+}
+
 .meal-item.dietary {
   border-left: 3px solid #f59e0b;
 }

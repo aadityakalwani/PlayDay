@@ -333,6 +333,67 @@ function App() {
     return duration; // fallback to original if no match
   };
 
+  // Calculate total walking time and breakdown from individual transport durations
+  const calculateWalkingTimeBreakdown = (activities) => {
+    const walkingSegments = [];
+    let totalMinutes = 0;
+
+    activities.forEach((activity, index) => {
+      if (activity.transportToNext && index < activities.length - 1) {
+        const transport = activity.transportToNext;
+        
+        // Only include walking segments
+        if (transport.mode && transport.mode.toLowerCase().includes('walk')) {
+          const durationStr = transport.duration || '';
+          
+          // Extract minutes from duration string (e.g. "15 minutes", "20 mins", "1 hour")
+          const minutesMatch = durationStr.match(/(\d+)\s*(?:minute|min)/i);
+          const hoursMatch = durationStr.match(/(\d+)\s*hour/i);
+          
+          let minutes = 0;
+          if (minutesMatch) {
+            minutes += parseInt(minutesMatch[1]);
+          }
+          if (hoursMatch) {
+            minutes += parseInt(hoursMatch[1]) * 60;
+          }
+          
+          if (minutes > 0) {
+            const nextActivity = activities[index + 1];
+            walkingSegments.push({
+              from: activity.name,
+              to: nextActivity.name,
+              duration: transport.duration,
+              minutes: minutes
+            });
+            totalMinutes += minutes;
+          }
+        }
+      }
+    });
+
+    // Format total time
+    let totalTimeStr = '';
+    if (totalMinutes >= 60) {
+      const hours = Math.floor(totalMinutes / 60);
+      const remainingMinutes = totalMinutes % 60;
+      if (remainingMinutes > 0) {
+        totalTimeStr = `${hours} hour${hours > 1 ? 's' : ''} ${remainingMinutes} minutes`;
+      } else {
+        totalTimeStr = `${hours} hour${hours > 1 ? 's' : ''}`;
+      }
+    } else if (totalMinutes > 0) {
+      totalTimeStr = `${totalMinutes} minutes`;
+    } else {
+      totalTimeStr = 'No walking required';
+    }
+
+    return {
+      totalWalkingTime: totalTimeStr,
+      walkingBreakdown: walkingSegments
+    };
+  };
+
   // creates an AI-powered itinerary using Hugging Face
   const generateMockItinerary = async (formData, retryCount = 0) => {
     const maxRetries = 5;
@@ -501,6 +562,9 @@ function App() {
         return hasCosts && totalCost > 0 ? `£${totalCost}` : 'Cost estimates being calculated...';
       };
       
+      // Calculate walking time from actual transport data
+      const walkingData = calculateWalkingTimeBreakdown(activities);
+      
       // Return data including the AI's structured response
       return {
         date: formData.date,
@@ -511,7 +575,8 @@ function App() {
         // Include the rich structured data from AI
         logistics: parsedResponse?.logistics ? {
           transportMethod: parsedResponse.logistics.transportAdvice,
-          totalWalkingTime: parsedResponse.logistics.totalWalkingTime,
+          totalWalkingTime: walkingData.totalWalkingTime,
+          walkingBreakdown: walkingData.walkingBreakdown,
           weatherBackup: parsedResponse.logistics.weatherContingency
         } : parsedResponse?.logistics,
         overallBudget: calculateTotalCost(activities), // calculate total from individual activity costs
@@ -1010,7 +1075,7 @@ function App() {
 
                     <div className="activity-map">
                       <img 
-                        src={`https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(activity.title + ', London, UK')}&zoom=14&size=260x120&markers=color:red%7C${encodeURIComponent(activity.title + ', London, UK')}&key=${process.env.REACT_APP_GOOGLE_MAPS_API_KEY}`}
+                        src={`https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(activity.title + ', London, UK')}&zoom=12&size=260x120&markers=color:red%7C${encodeURIComponent(activity.title + ', London, UK')}&key=${process.env.REACT_APP_GOOGLE_MAPS_API_KEY}`}
                         alt={`Map of ${activity.title}`}
                         className="static-map"
                         onError={(e) => {
@@ -1136,6 +1201,18 @@ function App() {
                   <div className="logistics-item">
                     <strong>Total Walking Time:</strong>
                     <span>{tripData.logistics.totalWalkingTime}</span>
+                    {tripData.logistics.walkingBreakdown && tripData.logistics.walkingBreakdown.length > 0 && (
+                      <div className="walking-breakdown">
+                        <div className="breakdown-header">Breakdown:</div>
+                        <ul className="breakdown-list">
+                          {tripData.logistics.walkingBreakdown.map((walk, index) => (
+                            <li key={index} className="breakdown-item">
+                              {walk.duration} from {walk.from} to {walk.to}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </div>
                   <div className="logistics-item">
                     <strong>Weather Backup Plan:</strong>

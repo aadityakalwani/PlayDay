@@ -63,8 +63,7 @@ Your entire response MUST be only the JSON object, starting with { and ending wi
 {
   "summary": "string // A vibrant, one-paragraph overview of the day's adventure, explaining why the chosen activities are a perfect match for this specific family's interests and children's ages.",
   "logistics": {
-    "totalWalkingTime": "string // Estimated total walking time for the day, e.g. '45 minutes' or '1 hour 20 mins'.",
-    "transportAdvice": "string // Recommend using contactless payment (bank card, phone, or watch) for all London transport - much easier than Oyster cards. Mention the best ticket options for the family (e.g., kids travel free under 11).",
+    "transportAdvice": "string // Recommend using contactless payment for all London transport - much easier than Oyster cards. Mention the best ticket options for the family (e.g., kids travel free under 11).",
     "weatherContingency": "string // A brief, practical backup plan in case of bad weather (e.g., 'If it rains, swap Hyde Park for the nearby Science Museum')."
   },
   "activities": [
