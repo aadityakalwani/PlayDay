@@ -397,7 +397,8 @@ function App() {
   // creates an AI-powered itinerary using Hugging Face
   const generateMockItinerary = async (formData, retryCount = 0) => {
     const maxRetries = 5;
-    const retryDelay = 2000; // 2 seconds
+    // Progressive backoff: 2s, 4s, 6s, 8s, 10s
+    const getRetryDelay = (attempt) => (attempt + 1) * 2000;
 
     const prompt = generatePrompt(formData, formatTimeRange);
 
@@ -423,14 +424,17 @@ function App() {
         if (response.status === 404) {
           throw new Error(`Model not found (404). The model might not be available or needs to be loaded. Response: ${errorText}`);
         } else if (response.status === 503) {
-          // Handle 503 errors with automatic retry logic
+          // Handle 503 errors with progressive backoff retry logic
           if (retryCount < maxRetries) {
-            console.log(`Gemini API overloaded (503). Attempt ${retryCount + 1} of ${maxRetries + 1}. Retrying in ${retryDelay/1000} seconds...`);
+            const currentRetryDelay = getRetryDelay(retryCount);
+            const waitTimeSeconds = currentRetryDelay / 1000;
             
-            setLoadingStatus(`503 error. Retrying in 2 seconds... (Attempt ${retryCount + 1} of ${maxRetries + 1})`);
+            console.log(`Gemini API overloaded (503). Attempt ${retryCount + 1} of ${maxRetries + 1}. Retrying in ${waitTimeSeconds} seconds...`);
             
-            // Wait for the retry delay
-            await new Promise(resolve => setTimeout(resolve, retryDelay));
+            setLoadingStatus(`503 error. Retrying in ${waitTimeSeconds} seconds... (Attempt ${retryCount + 1} of ${maxRetries + 1})`);
+            
+            // Wait for the progressive retry delay
+            await new Promise(resolve => setTimeout(resolve, currentRetryDelay));
             
             setLoadingStatus('Gemini is cooking your itinerary...');
             
