@@ -817,6 +817,8 @@ function App() {
     }
   }, [tripData]);
 
+  const hasErrors = Object.values(errors).some(error => !!error);
+
   return (
     <div className="App">
       <header className="App-header">
@@ -1019,8 +1021,8 @@ function App() {
               {errors.budget && <span className="error-message">{errors.budget}</span>}
             </div>
             
-            <button type="submit" className="submit-button" disabled={isLoading}>
-              {isLoading ? loadingStatus : 'Build My Trip'}
+            <button type="submit" className="submit-button" disabled={isLoading || hasErrors}>
+              {isLoading ? loadingStatus : hasErrors ? 'Please Fix Errors to Continue' : 'Build My Trip'}
             </button>
 
           </form>
@@ -1112,7 +1114,7 @@ function App() {
 
                     <div className="activity-map">
                       <img 
-                        src={`https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(activity.title + ', London, UK')}&zoom=12&size=260x120&markers=color:red%7C${encodeURIComponent(activity.title + ', London, UK')}&key=${process.env.REACT_APP_GOOGLE_MAPS_API_KEY}`}
+                        src={`https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(activity.title + ', London, UK')}&zoom=11&size=260x120&markers=color:red%7C${encodeURIComponent(activity.title + ', London, UK')}&key=${process.env.REACT_APP_GOOGLE_MAPS_API_KEY}`}
                         alt={`Map of ${activity.title}`}
                         className="static-map"
                         onError={(e) => {

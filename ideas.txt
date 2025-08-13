@@ -24,16 +24,4 @@ ability to remember the user or add in a profile (so it learns I have a 3 year o
 
 improved/more accurate pricing eg. for the tube
 
-list of where the walking time is actually coming from in the 'total walking time' eg:
-1 hour total walking time:
-    - 15 minutes london eye to hyde park
-    ...
-
-remove 'bank card, phone, etc' from prompt
-
-if something in the form was incorrect (eg. no date seleted) then show an error message to the suer above the ‘build my trip button’ so they don’t have to scroll
-
 what if I don’t like any of the activities? add in maybe two options and you clicke ith one you prefer, or that it will ’try again’ on a certain option and take a new place (another request to gemini)
-
-if the date range was 9am to 6pm then actually make it finish at 6pm and not earlier
- - dont limit the number of activities based on the tags that the user selected
