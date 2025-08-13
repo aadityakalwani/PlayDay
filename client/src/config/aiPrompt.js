@@ -46,6 +46,10 @@ Before generating the output, you must internally consider every single one of t
 - Plan for nap times or quieter periods for younger children.
 - Ensure venues and routes are stroller-friendly if required by the family's notes.
 
+**SCHEDULE & PACING:**
+- **Fill the Day:** The final activity must conclude at or very close to the user's specified end time. The goal is a full, complete day. If there's spare time, add a final smaller activity (like a specific playground or a quick treat stop) to fill the gap. Ideally make this such that it follows the interests and is well designed per the children and preferences.
+- **Interest Variety, Not Activity Limit:** The number of interests selected by the user is a guide for variety, not a strict limit on the number of activities. The itinerary should include as many activities as can comfortably fit within the time frame, reflecting a mix of the chosen interests.
+
 **BUDGET OPTIMIZATION:**
 - Research current (2025) pricing for tickets and food.
 - Look for family discounts, free activities, and suggest money-saving tips like bringing packed snacks.
