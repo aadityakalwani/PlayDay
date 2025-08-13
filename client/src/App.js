@@ -38,6 +38,7 @@ function App() {
   const [regeneratingActivityId, setRegeneratingActivityId] = useState(null);
   const [activityToRegenerate, setActivityToRegenerate] = useState(null); // For showing the input
   const [regenerationReason, setRegenerationReason] = useState(''); // For the input text
+  const [regenerationStatus, setRegenerationStatus] = useState(''); // For loading messages during regeneration
 
 
   // track which activities are completed
@@ -692,6 +693,13 @@ function App() {
 
     // Set detailed loading status based on model and attempt
     const modelDisplayName = modelName === 'gemini-2.0-flash-exp' ? 'Gemini 2.0 Flash' : 'Gemini 1.5 Flash';
+    
+    if (retryCount === 0) {
+      setRegenerationStatus(`🤖 Connecting to ${modelDisplayName}...`);
+    } else {
+      setRegenerationStatus(`🤖 ${modelDisplayName} (Attempt ${retryCount + 1}/${maxRetries + 1})`);
+    }
+
     console.log(`Regenerating activity with ${modelDisplayName}, attempt ${retryCount + 1}/${maxRetries + 1}`);
 
     // Construct a highly specific prompt for regeneration
@@ -769,6 +777,8 @@ function App() {
             
             console.log(`Regeneration API overloaded (503). Attempt ${retryCount + 1} of ${maxRetries + 1}. Retrying in ${waitTimeSeconds} seconds...`);
             
+            setRegenerationStatus(`⏳ ${modelDisplayName} overloaded. Retrying in ${waitTimeSeconds}s... (${retryCount + 1}/${maxRetries + 1})`);
+            
             // Wait for the progressive retry delay
             await new Promise(resolve => setTimeout(resolve, currentRetryDelay));
             
@@ -777,6 +787,7 @@ function App() {
           } else if (modelName === 'gemini-2.0-flash-exp') {
             // Max retries reached with 2.0 Flash, try Gemini 1.5 Flash
             console.log('Max retries reached with Gemini 2.0 Flash for regeneration, switching to Gemini 1.5 Flash...');
+            setRegenerationStatus('🔄 Switching to Gemini 1.5 Flash model...');
             return await submitRegeneration(activityIdToReplace, 0, 'gemini-1.5-flash-latest');
           } else {
             // Max retries reached with both models
@@ -787,12 +798,16 @@ function App() {
         }
       }
 
+      setRegenerationStatus(`✅ ${modelDisplayName} responded! Processing new activity...`);
+
       const data = await response.json();
       const aiText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
 
       if (!aiText) {
         throw new Error("Received an empty response from the AI.");
       }
+
+      setRegenerationStatus('🧩 Parsing AI response...');
 
       // Clean the response to extract JSON
       const jsonMatch = aiText.match(/\{[\s\S]*\}/);
@@ -801,6 +816,8 @@ function App() {
       }
 
       const newActivityData = JSON.parse(jsonMatch[0]);
+
+      setRegenerationStatus('🎯 Updating your itinerary...');
 
       const newActivities = [...tripData.activities];
       newActivities[activityIndex] = {
@@ -819,13 +836,19 @@ function App() {
       };
 
       setTripData({ ...tripData, activities: newActivities });
+      setRegenerationStatus('🎉 Activity swapped successfully!');
 
     } catch (error) {
       console.error("Failed to regenerate activity:", error);
+      setRegenerationStatus('❌ Failed to swap activity');
       alert(`There was an error swapping the activity. Please try again. \n\n${error.message}`);
     } finally {
-      setRegeneratingActivityId(null);
-      setRegenerationReason('');
+      // Clear the status after a short delay to let the user see the success/error message
+      setTimeout(() => {
+        setRegeneratingActivityId(null);
+        setRegenerationReason('');
+        setRegenerationStatus('');
+      }, 1500);
     }
   };
 
@@ -1289,7 +1312,10 @@ function App() {
                         title="Swap this activity"
                         disabled={regeneratingActivityId !== null || activityToRegenerate !== null}
                       >
-                        🔄 Swap Activity
+                        {regeneratingActivityId === activity.id ? 
+                          regenerationStatus || '🔄 Swapping...' : 
+                          '🔄 Swap Activity'
+                        }
                       </button>
                       <button
                         onClick={() => handleDeleteActivity(activity.id)}
