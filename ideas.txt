@@ -1,17 +1,13 @@
 gmaps integration? for an accurate time/travel between places
 make the final itinerary page have a maps view of the suggested places
 
-some loading banner or distraction whilst the program is thinking of how to build the itinerary
+some loading banner or distraction (clash royale style) whilst the program is thinking of how to build the itinerary
 
 post/share to social media 
 
 consider how many parents there are + what they want to do
 
-
-
 if youre suggesting a show or a river cruise, ensure that there is actually a show and river cruise at that time
-
-suggested waiting period for the program to load (eg. "gemini is cooking estimated time 10 seconds in the meantime yada yada just like clash royale loading screen)
 
 have children inside of a toggle
 same for activities on the generated itinerary
@@ -20,4 +16,6 @@ ability to remember the user or add in a profile (so it learns I have a 3 year o
 
 improved/more accurate pricing eg. for the tube
 
-what if I don’t like any of the activities? add in maybe two options and you clicke ith one you prefer, or that it will ’try again’ on a certain option and take a new place (another request to gemini)
+what if I don’t like one of the activities?
+     a button for each activity that will ’try again’ on a certain option and take a new place (another request to gemini?)
+        - if the user wants to regenerate, allow them an option 
