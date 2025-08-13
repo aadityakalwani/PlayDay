@@ -37,3 +37,5 @@ what if I don’t like any of the activities? add in maybe two options and you c
 
 if the date range was 9am to 6pm then actually make it finish at 6pm and not earlier
  - dont limit the number of activities based on the tags that the user selected
+
+ make both the image and map taller (not wider, but taller) to take up more space (if there is any extra vertical space)

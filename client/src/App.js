@@ -338,31 +338,37 @@ function App() {
     const walkingSegments = [];
     let totalMinutes = 0;
 
+    // Helper to parse duration strings like "1 hour 15 mins" into total minutes
+    const parseDurationToMinutes = (durationStr) => {
+      if (!durationStr) return 0;
+      
+      let minutes = 0;
+      const hourMatch = durationStr.match(/(\d+)\s*hour/i);
+      const minMatch = durationStr.match(/(\d+)\s*(?:minute|min)/i);
+
+      if (hourMatch) {
+        minutes += parseInt(hourMatch[1]) * 60;
+      }
+      if (minMatch) {
+        minutes += parseInt(minMatch[1]);
+      }
+      
+      return minutes;
+    };
+
     activities.forEach((activity, index) => {
       if (activity.transportToNext && index < activities.length - 1) {
         const transport = activity.transportToNext;
         
         // Only include walking segments
         if (transport.mode && transport.mode.toLowerCase().includes('walk')) {
-          const durationStr = transport.duration || '';
-          
-          // Extract minutes from duration string (e.g. "15 minutes", "20 mins", "1 hour")
-          const minutesMatch = durationStr.match(/(\d+)\s*(?:minute|min)/i);
-          const hoursMatch = durationStr.match(/(\d+)\s*hour/i);
-          
-          let minutes = 0;
-          if (minutesMatch) {
-            minutes += parseInt(minutesMatch[1]);
-          }
-          if (hoursMatch) {
-            minutes += parseInt(hoursMatch[1]) * 60;
-          }
+          const minutes = parseDurationToMinutes(transport.duration);
           
           if (minutes > 0) {
             const nextActivity = activities[index + 1];
             walkingSegments.push({
-              from: activity.name,
-              to: nextActivity.name,
+              from: activity.title, // Corrected from .name to .title
+              to: nextActivity.title,   // Corrected from .name to .title
               duration: transport.duration,
               minutes: minutes
             });
@@ -374,16 +380,14 @@ function App() {
 
     // Format total time
     let totalTimeStr = '';
-    if (totalMinutes >= 60) {
+    if (totalMinutes > 0) {
       const hours = Math.floor(totalMinutes / 60);
       const remainingMinutes = totalMinutes % 60;
-      if (remainingMinutes > 0) {
-        totalTimeStr = `${hours} hour${hours > 1 ? 's' : ''} ${remainingMinutes} minutes`;
-      } else {
-        totalTimeStr = `${hours} hour${hours > 1 ? 's' : ''}`;
-      }
-    } else if (totalMinutes > 0) {
-      totalTimeStr = `${totalMinutes} minutes`;
+      
+      const hourStr = hours > 0 ? `${hours} hour${hours > 1 ? 's' : ''}` : '';
+      const minStr = remainingMinutes > 0 ? `${remainingMinutes} minutes` : '';
+      
+      totalTimeStr = [hourStr, minStr].filter(Boolean).join(' ');
     } else {
       totalTimeStr = 'No walking required';
     }
@@ -1240,7 +1244,7 @@ function App() {
                         <ul className="breakdown-list">
                           {tripData.logistics.walkingBreakdown.map((walk, index) => (
                             <li key={index} className="breakdown-item">
-                              {walk.duration} from {walk.from} to {walk.to}
+                              <strong>{walk.duration}</strong> from <strong>{walk.from}</strong> to <strong>{walk.to}</strong>
                             </li>
                           ))}
                         </ul>
