@@ -1051,11 +1051,20 @@ function App() {
               </div>
             </div>
 
-            {tripData.aiResponse && (
-              <div className="ai-response">
-                <h3>🤖 AI Recommendation</h3>
-                <div className="ai-response-text">
-                  {tripData.aiResponse}
+            {tripData.activities && tripData.activities.length > 0 && (
+              <div className="journey-summary">
+                <h3>✨ Your Day at a Glance</h3>
+                <div className="journey-flow">
+                  {tripData.activities.map((activity, index) => (
+                    <React.Fragment key={activity.id}>
+                      <div className="journey-step">
+                        <span className="journey-step-title">{activity.title}</span>
+                      </div>
+                      {index < tripData.activities.length - 1 && (
+                        <div className="journey-arrow">→</div>
+                      )}
+                    </React.Fragment>
+                  ))}
                 </div>
               </div>
             )}

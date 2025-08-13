@@ -648,7 +648,7 @@ textarea {
 
 .itinerary {
   background: white;
-  padding: 0.5rem 1rem 1rem 1rem;
+  padding: 0.5rem 1.5rem 1.5rem 1.5rem;
   border-radius: 16px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
@@ -1463,4 +1463,41 @@ textarea {
     color: #1e293b;
     font-weight: 500;
   }
+}
+
+.journey-summary {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  border-left: 4px solid #3b82f6;
+}
+
+.journey-summary h3 {
+  margin: 0 0 1rem 0;
+  color: #1e3a8a;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.journey-flow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.journey-step {
+  background: white;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 500;
+  color: #1e40af;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.journey-arrow {
+  font-size: 1.5rem;
+  color: #3b82f6;
+  font-weight: bold;
 }
