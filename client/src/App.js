@@ -672,7 +672,11 @@ function App() {
     setRegenerationReason('');
   };
 
-  const submitRegeneration = async (activityIdToReplace) => {
+  const submitRegeneration = async (activityIdToReplace, retryCount = 0, modelName = 'gemini-2.0-flash-exp') => {
+    const maxRetries = 5;
+    // Progressive backoff: 2s, 4s, 6s, 8s, 10s
+    const getRetryDelay = (attempt) => (attempt + 1) * 2000;
+
     setRegeneratingActivityId(activityIdToReplace);
     setActivityToRegenerate(null); // Hide the input form while processing
 
@@ -685,6 +689,10 @@ function App() {
     const previousActivity = activityIndex > 0 ? tripData.activities[activityIndex - 1] : null;
     const nextActivity = activityIndex < tripData.activities.length - 1 ? tripData.activities[activityIndex + 1] : null;
     const activityToReplace = tripData.activities[activityIndex];
+
+    // Set detailed loading status based on model and attempt
+    const modelDisplayName = modelName === 'gemini-2.0-flash-exp' ? 'Gemini 2.0 Flash' : 'Gemini 1.5 Flash';
+    console.log(`Regenerating activity with ${modelDisplayName}, attempt ${retryCount + 1}/${maxRetries + 1}`);
 
     // Construct a highly specific prompt for regeneration
     const regenerationPrompt = `
@@ -734,13 +742,9 @@ function App() {
         }` : 'null'}
       }
     `;
-    
-    console.log("Regeneration prompt:", regenerationPrompt);
 
     try {
       const apiKey = process.env.REACT_APP_GEMINI_API_KEY;
-      // Using the latest 1.5 flash model as it's fast and capable for this targeted task.
-      const modelName = 'gemini-1.5-flash-latest';
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
 
       const response = await fetch(url, {
@@ -753,7 +757,34 @@ function App() {
 
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`Gemini API error during regeneration: ${response.status} - ${errorText}`);
+        console.log('Regeneration API error response:', errorText);
+        
+        if (response.status === 404) {
+          throw new Error(`Model not found (404). The model might not be available. Response: ${errorText}`);
+        } else if (response.status === 503) {
+          // Handle 503 errors with progressive backoff retry logic
+          if (retryCount < maxRetries) {
+            const currentRetryDelay = getRetryDelay(retryCount);
+            const waitTimeSeconds = currentRetryDelay / 1000;
+            
+            console.log(`Regeneration API overloaded (503). Attempt ${retryCount + 1} of ${maxRetries + 1}. Retrying in ${waitTimeSeconds} seconds...`);
+            
+            // Wait for the progressive retry delay
+            await new Promise(resolve => setTimeout(resolve, currentRetryDelay));
+            
+            // Recursive call with incremented retry count
+            return await submitRegeneration(activityIdToReplace, retryCount + 1, modelName);
+          } else if (modelName === 'gemini-2.0-flash-exp') {
+            // Max retries reached with 2.0 Flash, try Gemini 1.5 Flash
+            console.log('Max retries reached with Gemini 2.0 Flash for regeneration, switching to Gemini 1.5 Flash...');
+            return await submitRegeneration(activityIdToReplace, 0, 'gemini-1.5-flash-latest');
+          } else {
+            // Max retries reached with both models
+            throw new Error(`Service unavailable (503). Both Gemini models overloaded after multiple attempts during regeneration. Response: ${errorText}`);
+          }
+        } else {
+          throw new Error(`Gemini API error during regeneration: ${response.status} - ${errorText}`);
+        }
       }
 
       const data = await response.json();
@@ -786,11 +817,6 @@ function App() {
         practicalTips: newActivityData.practicalInfo?.accessibility,
         transportToNext: newActivityData.transportToNext,
       };
-
-      // If the replaced activity wasn't the first one, we also need to update the *previous* activity's transport link.
-      // This is a tricky problem. For now, we'll leave the previous transport as-is,
-      // as getting a new travel time would require another API call or complex client-side logic.
-      // The user can re-order to recalculate times if needed.
 
       setTripData({ ...tripData, activities: newActivities });
 
