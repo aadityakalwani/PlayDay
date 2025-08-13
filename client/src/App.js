@@ -965,7 +965,8 @@ function App() {
                   )}
                   <textarea 
                     name="preferences" // this tells handleChildChange which field is being updated
-                    placeholder="Preferences (e.g., loves dinosaurs, requires a stroller)"
+                    // placeholder="Preferences (e.g., loves dinosaurs, requires a stroller)"
+                    placeholder="Preferences (e.g., loves dinosaurs and animals, requires a stroller and lots of potty breaks, minor peanut allergy)"
                     value={child.preferences}
                     onChange={(e) => handleChildChange(index, e)}
                   />
@@ -981,7 +982,7 @@ function App() {
               <label>What are you and your family interested in?</label>
               <div className="button-group">
                 {/* create a button for each interest option */}
-                {['🏛️ Museums & Learning', '🌳 Parks & Playgrounds', '🍽️ Great Food Spots', '💎 Hidden Gems', '🎨 Art & Creativity', '🎭 Shows & Entertainment', '🛒 Markets & Shopping', '🦁 Animals & Wildlife', '🚀 Adventure & Thrills', '🏰 History & Castles', '🎡 Theme Parks', '🚢 River & Boats', '🍰 Sweet Treats', '📚 Story Time & Books', '⚽ Sports & Activities'].map(interest => (
+                {['🏛️ Museums', '🌳 Parks & Playgrounds', '🦁 Animal Fun', '🏰 Historic Sites', '🎭 Theatre Shows', '🚢 River Trips', '🎡 Iconic Attractions', '🎨 Arts & Crafts', '🍽️ Family Dining', '🛍️ Market Exploring', '⚽ Active Play', '🤫 Quiet Gardens', '✨ Interactive Fun', '📚 Storytelling & Books'].map(interest => (
                   <button 
                     type="button" 
                     key={interest}
