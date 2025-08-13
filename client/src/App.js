@@ -1007,6 +1007,29 @@ function App() {
                         />
                       )}
                     </div>
+
+                    <div className="activity-map">
+                      <img 
+                        src={`https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(activity.title + ', London, UK')}&zoom=14&size=260x120&markers=color:red%7C${encodeURIComponent(activity.title + ', London, UK')}&key=${process.env.REACT_APP_GOOGLE_MAPS_API_KEY}`}
+                        alt={`Map of ${activity.title}`}
+                        className="static-map"
+                        onError={(e) => {
+                          console.log('Map failed to load for:', activity.title);
+                          console.log('Full map URL:', e.target.src);
+                          console.log('API Key exists:', !!process.env.REACT_APP_GOOGLE_MAPS_API_KEY);
+                          
+                          // Create a placeholder instead
+                          e.target.style.display = 'none';
+                          const placeholder = document.createElement('div');
+                          placeholder.className = 'map-placeholder';
+                          placeholder.innerHTML = `📍 ${activity.title}<br><small>Map unavailable</small>`;
+                          e.target.parentElement.appendChild(placeholder);
+                        }}
+                        onLoad={() => {
+                          console.log('Map loaded successfully for:', activity.title);
+                        }}
+                      />
+                    </div>
                     
                     <div className="activity-details">
                       <h4>{activity.title}</h4>
