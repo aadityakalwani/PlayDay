@@ -35,7 +35,5 @@ if something in the form was incorrect (eg. no date seleted) then show an error 
 
 what if I don’t like any of the activities? add in maybe two options and you clicke ith one you prefer, or that it will ’try again’ on a certain option and take a new place (another request to gemini)
 
-if 503 then change wait duration from 2seconds to 4 to 6 to 8 and then maybe try another model aswell/instead
-
 if the date range was 9am to 6pm then actually make it finish at 6pm and not earlier
  - dont limit the number of activities based on the tags that the user selected

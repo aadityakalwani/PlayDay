@@ -286,7 +286,7 @@ function App() {
       if (response.ok) {
         const result = await response.json();
         
-        setLoadingStatus('Gemini is cooking your itinerary...');
+        setLoadingStatus('🚀 Starting with Gemini 2.0 Flash...');
         // create an AI-powered itinerary based on what they selected
         const mockItinerary = await generateMockItinerary(formData);
         setTripData(mockItinerary);
@@ -395,17 +395,28 @@ function App() {
   };
 
   // creates an AI-powered itinerary using Hugging Face
-  const generateMockItinerary = async (formData, retryCount = 0) => {
+  const generateMockItinerary = async (formData, retryCount = 0, modelName = 'gemini-2.0-flash-exp') => {
     const maxRetries = 5;
     // Progressive backoff: 2s, 4s, 6s, 8s, 10s
     const getRetryDelay = (attempt) => (attempt + 1) * 2000;
 
     const prompt = generatePrompt(formData, formatTimeRange);
 
+    // Set detailed loading status based on model and attempt
+    const modelDisplayName = modelName === 'gemini-2.0-flash-exp' ? 'Gemini 2.0 Flash' : 'Gemini 1.5 Flash';
+    if (retryCount === 0) {
+      setLoadingStatus(`🤖 Connecting to ${modelDisplayName}...`);
+    } else {
+      setLoadingStatus(`🤖 ${modelDisplayName} (Attempt ${retryCount + 1}/${maxRetries + 1})`);
+    }
+
     try {
 
       const apiKey = process.env.REACT_APP_GEMINI_API_KEY;
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+      
+      console.log(`Attempting with model: ${modelName}, retry: ${retryCount}`);
+      
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -431,26 +442,34 @@ function App() {
             
             console.log(`Gemini API overloaded (503). Attempt ${retryCount + 1} of ${maxRetries + 1}. Retrying in ${waitTimeSeconds} seconds...`);
             
-            setLoadingStatus(`503 error. Retrying in ${waitTimeSeconds} seconds... (Attempt ${retryCount + 1} of ${maxRetries + 1})`);
+            setLoadingStatus(`⏳ ${modelDisplayName} overloaded. Retrying in ${waitTimeSeconds}s... (${retryCount + 1}/${maxRetries + 1})`);
             
             // Wait for the progressive retry delay
             await new Promise(resolve => setTimeout(resolve, currentRetryDelay));
             
-            setLoadingStatus('Gemini is cooking your itinerary...');
-            
             // Recursive call with incremented retry count
-            return await generateMockItinerary(formData, retryCount + 1);
+            return await generateMockItinerary(formData, retryCount + 1, modelName);
+          } else if (modelName === 'gemini-2.0-flash-exp') {
+            // Max retries reached with 2.0 Flash, try Gemini 1.5 Flash
+            console.log('Max retries reached with Gemini 2.0 Flash, switching to Gemini 1.5 Flash...');
+            setLoadingStatus('🔄 Switching to Gemini 1.5 Flash model...');
+            return await generateMockItinerary(formData, 0, 'gemini-1.5-flash-latest');
           } else {
-            // Max retries reached, throw error to use fallback
-            throw new Error(`Service unavailable (503). The model is overloaded after ${maxRetries + 1} attempts. Response: ${errorText}`);
+            // Max retries reached with both models, throw error to use fallback
+            const modelUsed = modelName === 'gemini-1.5-flash-latest' ? 'both Gemini 2.0 and 1.5 Flash models' : 'Gemini 2.0 Flash';
+            throw new Error(`Service unavailable (503). ${modelUsed} overloaded after multiple attempts. Response: ${errorText}`);
           }
         } else {
           throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
         }
       }
 
+      setLoadingStatus(`✅ ${modelDisplayName} responded! Processing itinerary...`);
+      
       const data = await response.json();
       console.log('Gemini API Response:', data);
+      
+      setLoadingStatus('🧩 Parsing AI response...');
       
       // Extract the AI's response text from Gemini's response format
       const aiText = data?.candidates?.[0]?.content?.parts?.[0]?.text || 'AI response received but no text found.';
@@ -464,11 +483,13 @@ function App() {
         // Clean the response to extract JSON (remove markdown formatting if present)
         const jsonMatch = aiText.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
+          setLoadingStatus('📝 Found structured response! Parsing activities...');
           parsedResponse = JSON.parse(jsonMatch[0]);
           console.log('Parsed AI Response:', parsedResponse);
           
           // Extract activities from the structured response
           if (parsedResponse.activities && Array.isArray(parsedResponse.activities)) {
+            setLoadingStatus(`🎯 Processing ${parsedResponse.activities.length} activities...`);
             activities = parsedResponse.activities.map((activity, index) => ({
               id: `activity-${Date.now()}-${index}`, // Add unique ID
               time: activity.time,
@@ -488,10 +509,12 @@ function App() {
         }
       } catch (parseError) {
         console.error('Failed to parse AI JSON response:', parseError);
+        setLoadingStatus('⚠️ Could not parse AI response, using fallback activities...');
       }
       
       // Fallback activities with TK prefix if parsing failed or no activities found
       if (activities.length === 0) {
+        setLoadingStatus('🔧 Creating fallback activities based on your preferences...');
         console.log('Using fallback activities due to parsing failure or empty response');
         let currentTime = formData.timeRange[0];
         
@@ -567,7 +590,13 @@ function App() {
       };
       
       // Calculate walking time from actual transport data
+      setLoadingStatus('🚶‍♂️ Calculating walking times and logistics...');
       const walkingData = calculateWalkingTimeBreakdown(activities);
+      
+      setLoadingStatus('💰 Estimating costs...');
+      const totalBudget = calculateTotalCost(activities);
+      
+      setLoadingStatus('🎉 Finalizing your perfect itinerary!');
       
       // Return data including the AI's structured response
       return {
@@ -583,7 +612,7 @@ function App() {
           walkingBreakdown: walkingData.walkingBreakdown,
           weatherBackup: parsedResponse.logistics.weatherContingency
         } : parsedResponse?.logistics,
-        overallBudget: calculateTotalCost(activities), // calculate total from individual activity costs
+        overallBudget: totalBudget, // calculate total from individual activity costs
         mealPlanning: parsedResponse?.mealPlan ? {
           breakfast: null,
           lunch: `${parsedResponse.mealPlan.lunch?.venue} (${parsedResponse.mealPlan.lunch?.time})`,

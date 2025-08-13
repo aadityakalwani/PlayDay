@@ -23,7 +23,7 @@ Before generating the output, you must internally consider every single one of t
 - Calculate realistic travel times between locations using London public transport (Tube/Bus).
 - Factor in walking distances from stations to venues and potential for delays.
 - Recommend the most family-friendly routes (e.g., step-free access for strollers).
-- Include transport costs in the budget. Always recommend contactless payment (bank card, phone, or watch) as the easiest method - no need for Oyster cards when you can tap contactless directly.
+- Include transport costs in the budget. Always recommend contactless payment as the easiest method - no need for Oyster cards when you can tap contactless directly.
 - **TRAVEL CONTINGENCIES:** Build in buffer time (e.g., 15-20 minutes) between the end of one activity's travel and the start of the next. This "crossover" time is for unexpected delays, toilet breaks, or toddler tantrums. Suggest specific spots for a quick snack or rest *during* the commute if it's a long one.
 
 **CROWD MANAGEMENT:**
