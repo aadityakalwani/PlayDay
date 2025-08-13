@@ -18,4 +18,6 @@ improved/more accurate pricing eg. for the tube
 
 what if I don’t like one of the activities?
      a button for each activity that will ’try again’ on a certain option and take a new place (another request to gemini?)
-        - if the user wants to regenerate, allow them an option 
+        - if the user wants to regenerate, allow them an option to add in some 'extra details' about why they rejected it/what theyd prefere instead
+
+    improve the prompt for regeneration

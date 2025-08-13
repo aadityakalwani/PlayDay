@@ -468,6 +468,28 @@ textarea {
   transform: translateY(0);
 }
 
+/* Regenerate and Delete Buttons */
+.regenerate-button {
+  background-color: #e0e0e0;
+  color: #333;
+  font-size: 1rem;
+}
+
+.regenerate-button:hover {
+  background-color: #d0d0d0;
+}
+
+.regenerate-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.delete-button {
+  background-color: #fbebeb;
+  color: #c53030;
+  font-size: 1rem;
+}
+
 /* Child Form Styling */
 .child-form {
   border: 2px solid #f3f4f6;

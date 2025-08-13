@@ -34,6 +34,9 @@ function App() {
   // holds the generated itinerary data once the form is submitted
   const [tripData, setTripData] = useState(null);
 
+  // track which activity is being regenerated
+  const [regeneratingActivityId, setRegeneratingActivityId] = useState(null);
+
   // track which activities are completed
   const [completedActivities, setCompletedActivities] = useState(new Set());
 
@@ -606,6 +609,7 @@ function App() {
       return {
         date: formData.date,
         children: formData.children,
+        interests: formData.interests, // <-- Add this line
         activities,
         totalDuration: formatTimeRange(formData.timeRange),
         timeRange: formData.timeRange,
@@ -653,6 +657,152 @@ function App() {
         aiResponse: `AI Error: ${error.message}. Using fallback recommendations.`
       };
     }
+  };
+
+  const handleRegenerateActivity = async (activityIdToReplace) => {
+    setRegeneratingActivityId(activityIdToReplace);
+
+    const activityIndex = tripData.activities.findIndex(a => a.id === activityIdToReplace);
+    if (activityIndex === -1) return;
+
+    const previousActivity = activityIndex > 0 ? tripData.activities[activityIndex - 1] : null;
+    const nextActivity = activityIndex < tripData.activities.length - 1 ? tripData.activities[activityIndex + 1] : null;
+    const activityToReplace = tripData.activities[activityIndex];
+
+    // Construct a highly specific prompt for regeneration
+    const regenerationPrompt = `
+      You are an expert London tour guide. Your task is to replace one activity in an existing itinerary with a new one.
+
+      **Original Itinerary Context:**
+      - The user disliked this activity: "${activityToReplace.title}".
+      - The family's general interests are: ${tripData.interests.join(', ')}.
+      - The children's ages are: ${tripData.children.map(c => c.age).join(', ')}.
+      - The family's budget is level: "${tripData.budgetLevel}".
+      - The time slot for this activity is roughly: ${activityToReplace.time}.
+      - The previous activity was: ${previousActivity ? `"${previousActivity.title}" at "${previousActivity.location.address}"` : 'This is the first activity of the day.'}
+      - The next activity is: ${nextActivity ? `"${nextActivity.title}" at "${nextActivity.location.address}"` : 'This is the final activity of the day.'}
+
+      **Your Task:**
+      Suggest a single, new, family-friendly activity in London that fits the context above.
+      - It MUST be different from "${activityToReplace.title}".
+      - It should be geographically logical, considering the previous and next locations.
+
+      **Output Format:**
+      Your response MUST be a single JSON object for the new activity, in exactly this format. Do not include any other text or markdown.
+
+      {
+        "time": "${activityToReplace.time}",
+        "duration": "string (e.g., '1 hour 30 mins')",
+        "title": "string",
+        "description": "string (A compelling, parent-focused description)",
+        "location": {
+          "address": "string (Full address)",
+          "nearestTube": "string (e.g., 'South Kensington')"
+        },
+        "crowdLevel": "string (e.g., 'Can be busy, book ahead')",
+        "practicalInfo": {
+          "booking": "string (e.g., 'Booking essential, especially for weekends.')",
+          "accessibility": "string (e.g., 'Fully accessible with ramps and lifts.')",
+          "childEngagement": "string (Aimed at parents, explaining what will captivate the children)",
+          "estimatedCost": "string (e.g., '£25 per adult, children free' or 'Free')"
+        },
+        "transportToNext": ${nextActivity ? `{
+          "mode": "string (e.g., 'Walk', 'Tube', 'Bus')",
+          "duration": "string (e.g., '15 minute walk')",
+          "details": "string (Provide clear, simple directions)",
+          "contingencyAdvice": "string (e.g., 'If it rains, the No. 74 bus is a good alternative.')"
+        }` : 'null'}
+      }
+    `;
+    
+    // This part would call the Gemini API with the regenerationPrompt
+    // For now, we'll simulate the response with a timeout.
+    console.log("Regeneration prompt:", regenerationPrompt);
+
+    try {
+      const apiKey = process.env.REACT_APP_GEMINI_API_KEY;
+      // Using the latest 1.5 flash model as it's fast and capable for this targeted task.
+      const modelName = 'gemini-1.5-flash-latest';
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: regenerationPrompt }] }],
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Gemini API error during regeneration: ${response.status} - ${errorText}`);
+      }
+
+      const data = await response.json();
+      const aiText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+      if (!aiText) {
+        throw new Error("Received an empty response from the AI.");
+      }
+
+      // Clean the response to extract JSON
+      const jsonMatch = aiText.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        throw new Error("AI response did not contain valid JSON.");
+      }
+
+      const newActivityData = JSON.parse(jsonMatch[0]);
+
+      const newActivities = [...tripData.activities];
+      newActivities[activityIndex] = {
+        id: `activity-${Date.now()}-regen`, // new unique ID
+        time: newActivityData.time,
+        title: newActivityData.title,
+        description: newActivityData.description,
+        duration: formatDuration(newActivityData.duration),
+        budgetLevel: tripData.budgetLevel,
+        location: newActivityData.location,
+        crowdLevel: newActivityData.crowdLevel,
+        costEstimate: newActivityData.practicalInfo?.estimatedCost,
+        childEngagement: newActivityData.practicalInfo?.childEngagement,
+        practicalTips: newActivityData.practicalInfo?.accessibility,
+        transportToNext: newActivityData.transportToNext,
+      };
+
+      // If the replaced activity wasn't the first one, we also need to update the *previous* activity's transport link.
+      // This is a tricky problem. For now, we'll leave the previous transport as-is,
+      // as getting a new travel time would require another API call or complex client-side logic.
+      // The user can re-order to recalculate times if needed.
+
+      setTripData({ ...tripData, activities: newActivities });
+
+    } catch (error) {
+      console.error("Failed to regenerate activity:", error);
+      alert(`There was an error swapping the activity. Please try again. \n\n${error.message}`);
+    } finally {
+      setRegeneratingActivityId(null);
+    }
+  };
+
+  const handleDeleteActivity = (activityIdToDelete) => {
+    const newActivities = tripData.activities.filter(a => a.id !== activityIdToDelete);
+    
+    // After deleting, we need to recalculate walking times and potentially update the transport link of the new last activity.
+    const updatedTripData = {
+      ...tripData,
+      activities: newActivities,
+    };
+
+    const walkingData = calculateWalkingTimeBreakdown(newActivities);
+    updatedTripData.logistics.totalWalkingTime = walkingData.totalWalkingTime;
+    updatedTripData.logistics.walkingBreakdown = walkingData.walkingBreakdown;
+
+    // Ensure the new last activity has no "transportToNext"
+    if (newActivities.length > 0) {
+      newActivities[newActivities.length - 1].transportToNext = null;
+    }
+
+    setTripData(updatedTripData);
   };
 
   // handles drag and drop reordering of activities
@@ -1092,6 +1242,21 @@ function App() {
                         <span className="drag-icon">⋮⋮</span>
                       </div>
                       <span className="activity-number">Activity {index + 1}</span>
+                      <button
+                        onClick={() => handleRegenerateActivity(activity.id)}
+                        className="control-button regenerate-button"
+                        title="Swap this activity"
+                        disabled={regeneratingActivityId !== null}
+                      >
+                        {regeneratingActivityId === activity.id ? '...' : '🔄'}
+                      </button>
+                      <button
+                        onClick={() => handleDeleteActivity(activity.id)}
+                        className="control-button delete-button"
+                        title="Delete this activity"
+                      >
+                        🗑️
+                      </button>
                       <div className="activity-checkbox">
                         <input
                           type="checkbox"
