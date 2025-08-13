@@ -715,8 +715,6 @@ function App() {
       }
     `;
     
-    // This part would call the Gemini API with the regenerationPrompt
-    // For now, we'll simulate the response with a timeout.
     console.log("Regeneration prompt:", regenerationPrompt);
 
     try {
